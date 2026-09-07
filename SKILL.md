@@ -1,8 +1,8 @@
 ---
 name: commit-it
-description: Track requested features, fixes and GitHub delivery, prepare authorized issue-linked commits, and perform scoped PR reviews with explicit LGTM approval labels or actionable change requests under the repository workflow.
+description: Track requested features, fixes and GitHub delivery, prepare authorized issue-linked commits, perform scoped PR reviews, and resolve an explicitly assigned PR set through verified integration and authorized ordered merges.
 metadata:
-  version: "2.8.0"
+  version: "2.9.0"
 ---
 
 # Commit It
@@ -179,6 +179,17 @@ When a repository separates development authorship from operational records,
 follow its repository or global identity policy. Keep personal account mappings,
 local paths, credentials and deployment configuration outside this reusable skill.
 
+### Explicit conflict-resolution mode
+
+For an explicitly assigned resolver of a named PR set, read
+[conflict resolution](references/conflict-resolution.md) before editing or publishing.
+The mode preserves the actual worker ID and original authorship, records a versioned
+merge sequence, and permits `Conflict resolution: LGTM` only for verified integration.
+It does not expand ordinary worker permissions. Named merge authorization is separate
+from review approval; execute/resume an authorized sequence in the foreground using
+fresh head/base/tree evidence and actual merge receipts. The reference includes the
+complete copyable prompt; configure its model and reasoning effort in the launcher.
+
 ### Dependabot reconciliation
 
 When the user or repository enables automatic Dependabot management, inspect relevant
@@ -338,18 +349,20 @@ implementation, issue management, merging, or unrelated cleanup.
   account authorship alone cannot distinguish workers sharing one GitHub account.
 - If review publication is authorized and the scope has no blockers, the first line must
   be exactly `Self-review: LGTM` for work this agent authored or `Review: LGTM` for
-  another worker's work. These are the only approval labels; never use bare `OK`, bare
-  `LGTM`, or another variant. For blockers, use `Changes requested` with actionable
+  another worker's work. Only an explicitly assigned conflict resolver may instead use
+  `Conflict resolution: LGTM` under the conflict-resolution reference. These are the
+  only approval headings; never use bare `OK`, bare `LGTM`, or another variant.
+  For blockers, use `Changes requested` with actionable
   findings from the reference template. Record the reviewed head and scope; review the
   new delta when the head changes.
 - A shared author account cannot formally approve or request changes on its own PR.
   Publish the result as a comment review in that case and describe its actual state.
-- For this worker's own completed PRs, reuse the implementation and tester's passing
+- For an ordinary worker's own completed PRs, reuse the implementation and tester's passing
   evidence, briefly review the final diff, and post `Self-review: LGTM` immediately if unblocked.
   Do not add another audit or repeat valid tests. Recheck only a relevant change or failure.
   Do not present self-review as independent or human approval. Unfinished work and pending
-  required checks must not receive either approval label.
-- Keep PR-only worker boundaries intact. Neither approval label authorizes merge, local-main
+  required checks must not receive any approval heading.
+- Keep PR-only worker boundaries intact. No approval heading authorizes merge, local-main
   integration, issue edits, or additional implementation. Do not repeat an unchanged review.
 
 ## Tutorial and Documentation Checkpoint

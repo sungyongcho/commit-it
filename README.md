@@ -7,6 +7,7 @@ and concise pull request reviews.
 - Preserve foreign changes and the repository's own authority rules.
 - Track worker ownership independently of shared GitHub accounts.
 - Publish precise `Self-review: LGTM`, `Review: LGTM` or actionable change requests.
+- Use `Conflict resolution: LGTM` only for an explicitly assigned resolver and verified integration.
 - Reuse valid evidence instead of repeating broad audits.
 
 ## Install
@@ -33,7 +34,9 @@ delivery work. It does not grant permission to publish, merge, change protection
 spend money or overwrite user work. Repository and user instructions take precedence.
 
 Start with `SKILL.md`. Read `references/worker-coordination.md` when using named
-workers, and `references/pr-review.md` for review work. The optional protection helper
+workers, and `references/pr-review.md` for review work. Explicit resolver assignments
+use the [conflict-resolution protocol](references/conflict-resolution.md) and its
+[copyable prompt](references/conflict-resolution.md#copyable-prompt). The optional protection helper
 requires Python 3 and an authenticated GitHub CLI, and changes protection only when
 you explicitly authorize that operation.
 
@@ -41,7 +44,7 @@ you explicitly authorize that operation.
 
 This repository is the canonical reusable package. Keep personal account routing,
 private operations state, credentials and machine-specific settings outside it.
-Consumers can vendor the five package files with an exact source commit and SHA-256
+Consumers can vendor the six package files with an exact source commit and SHA-256
 manifest. That provides a complete offline copy without a recursive submodule checkout.
 Update the source first, then review and advance the consumer's pin.
 

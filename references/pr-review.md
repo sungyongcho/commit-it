@@ -29,17 +29,27 @@ Judge the implementation against the agreed outcome and code evidence, not again
 unpublished personal design. A further improvement is blocking only when necessary for
 the authorized outcome; otherwise keep it explicitly optional.
 
-For this worker's completed PR, reuse the implementation and tester's passing evidence.
+For an ordinary worker's completed PR, reuse the implementation and tester's passing evidence.
 Briefly inspect the final diff and immediately post `Self-review: LGTM` if it has no
 blocker; do not add a second audit or rerun valid tests. Recheck only a relevant new
 change or failure and name the reviewed head. An unfinished scope, known blocker or
-pending required check must not receive either approval label.
+pending required check must not receive any approval heading.
 
-Successful reviews use exactly `Self-review: LGTM` as the first line for the reviewer's
-own work or `Review: LGTM` for another worker's work. These are the only approval labels;
-never use bare `OK`, bare `LGTM`, or another variant. Determine ownership from actual
-work, not the shared GitHub account. Neither label is independent human approval or a
-guarantee that every behavior was tested. A review never grants permission to merge or deploy.
+Successful reviews use one exact first line, according to the actual assignment:
+
+| Approval heading | Applicable work |
+| --- | --- |
+| `Self-review: LGTM` | Work the reviewer authored. |
+| `Review: LGTM` | Another worker's work reviewed without taking ownership. |
+| `Conflict resolution: LGTM` | Verified integration by the explicitly assigned `conflict-resolver` for the named PR set. |
+
+These are the only approval headings; never use bare `OK`, bare `LGTM`, or another
+variant. All require the same completed scope and verified evidence for the recorded
+head/base; none claims independent human approval or guarantees that every behavior
+was tested. Determine authorship from actual work, not the shared GitHub account.
+A review never grants permission to merge or deploy. A conflict resolver preserves
+original authorship and follows the additional tree/sequence requirements in
+[conflict resolution](conflict-resolution.md); ordinary reviews do not activate it.
 
 ## Project-oriented reason codes
 
