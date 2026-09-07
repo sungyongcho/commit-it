@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit It"
+  short_description: "GitHub tracking, commits, PRs and Dependabot management"
+  default_prompt: "Use $commit-it to track repository work and authorized Dependabot updates through gh, then prepare or execute issue-linked commits and PR delivery under the repository workflow."
