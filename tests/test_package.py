@@ -15,8 +15,8 @@ class PackageTests(unittest.TestCase):
         text = (ROOT / 'SKILL.md').read_text()
         self.assertTrue(text.startswith('---\nname: commit-it\n'))
         self.assertIn('description:', text.split('---', 2)[1])
-        self.assertIn('version: "2.9.0"', text)
-        for file in [ROOT / 'SKILL.md', ROOT / 'README.md', *ROOT.joinpath('references').glob('*.md')]:
+        self.assertRegex(text, r'version: "\d+\.\d+\.\d+"')
+        for file in [ROOT / 'SKILL.md', ROOT / 'README.md', *ROOT.joinpath('docs').glob('*.md'), *ROOT.joinpath('references').glob('*.md')]:
             for link in re.findall(r'\]\(([^)]+)\)', file.read_text()):
                 if '://' not in link and not link.startswith('#'):
                     self.assertTrue((file.parent / link.split('#')[0]).exists(), link)

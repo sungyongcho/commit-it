@@ -9,6 +9,13 @@ metadata:
 
 Turn the current task's verified changes into the smallest coherent commit sequence.
 
+When another conversation may have updated this skill, resolve the installed directory
+and reread its current source and relevant references before use. Follow applicable
+repository instructions, including AGENTS.md and CLAUDE.md, without replacing them.
+For requested changes to the skill itself, update the canonical source through its
+configured local maintenance workflow. Preserve concurrent edits and do not create an
+independent provider copy. Ordinary policy edits do not select a new release version.
+
 ## Boundaries
 
 - Read repository-local commit instructions first. They override this skill, including
