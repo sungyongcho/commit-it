@@ -1,53 +1,128 @@
 # Commit It
 
-A reusable agent skill for scoped GitHub delivery, explicit worker coordination,
-and concise pull request reviews.
-
-- Connect requested work, issues, commits, verification and PRs.
-- Preserve foreign changes and the repository's own authority rules.
-- Track worker ownership independently of shared GitHub accounts.
-- Publish precise `Self-review: LGTM`, `Review: LGTM` or actionable change requests.
-- Use `Conflict resolution: LGTM` only for an explicitly assigned resolver and verified integration.
-- Reuse valid evidence instead of repeating broad audits.
+A reusable skill for scoped GitHub delivery in Codex, Claude Code and Gemini CLI.
+Connect requested work, issues, commits, verification and PRs while preserving foreign
+changes, actual worker ownership and the repository's authority rules.
 
 ## Install
 
-Ask your agent's skill installer to install `sungyongcho/commit-it` from GitHub.
-The skill is at the repository root. Prefer an exact reviewed commit for managed use.
+The same `SKILL.md`, references and helpers work across supported local skill loaders.
+The installer keeps one source at `~/Documents/skills/commit-it` and links agent discovery
+paths to it. Codex and Gemini share `~/.agents/skills/commit-it`; Claude Code uses
+`~/.claude/skills/commit-it`. It does not install agent applications or change authentication.
 
-For a new, empty Codex skill location:
+You need Python 3 and Git. GitHub operations also require `gh` and the appropriate login.
+Missing tools are reported. Use a reviewed source commit for managed installations.
+A version label alone does not identify unpublished local edits.
 
-```sh
-git clone https://github.com/sungyongcho/commit-it "$HOME/.codex/skills/commit-it"
+### Codex
+
+Copy this prompt into Codex:
+
+```text
+Install Commit It from https://github.com/sungyongcho/commit-it for Codex.
+Read the current README and inspect scripts/install.py from one reviewed source commit.
+Use the default shared source location and run the installer with --agent codex.
+Preserve existing skills and local changes; report conflicts instead of overwriting them.
+Verify the resolved source, source commit and installed files, then confirm skill discovery.
+Do not install other applications, change credentials, or perform GitHub writes.
 ```
 
-Claude Code can use the same package at `$HOME/.claude/skills/commit-it`. Preserve
-existing installations and local instructions; do not clone over or reset them.
-A managed installer should copy the package files unchanged and put project-specific
-policy in the project's or host's own instructions. New Codex skill installations
-are available on the next turn.
+Or run these commands after reviewing the downloaded source:
+
+```sh
+install_source=$(mktemp -d)
+git clone --depth 1 https://github.com/sungyongcho/commit-it "$install_source/commit-it"
+git -C "$install_source/commit-it" rev-parse HEAD
+python3 "$install_source/commit-it/scripts/install.py" --agent codex --dry-run
+python3 "$install_source/commit-it/scripts/install.py" --agent codex
+```
+
+Invoke `$commit-it` with the requested scope. If discovery has not refreshed, restart
+Codex. See [official local skill discovery](https://learn.chatgpt.com/docs/build-skills).
+
+### Claude Code
+
+Copy this prompt into Claude Code:
+
+```text
+Install Commit It from https://github.com/sungyongcho/commit-it for Claude Code.
+Read the current README and inspect scripts/install.py from one reviewed source commit.
+Use the default shared source location and run the installer with --agent claude.
+Preserve existing skills and local changes; report conflicts instead of overwriting them.
+Verify the resolved source, source commit and installed files, then confirm /commit-it discovery.
+Do not install other applications, change credentials, or perform GitHub writes.
+```
+
+```sh
+install_source=$(mktemp -d)
+git clone --depth 1 https://github.com/sungyongcho/commit-it "$install_source/commit-it"
+git -C "$install_source/commit-it" rev-parse HEAD
+python3 "$install_source/commit-it/scripts/install.py" --agent claude --dry-run
+python3 "$install_source/commit-it/scripts/install.py" --agent claude
+```
+
+Invoke `/commit-it` with the requested scope. Restart Claude Code if its top-level
+skills directory was created during the current session. See
+[official Claude Code skills](https://code.claude.com/docs/en/skills).
+
+### Gemini CLI and shared installation
+
+Use `--agent gemini` for Gemini, `--agent both` for Codex and Claude Code, or
+`--agent all` for all three. These choices share source files rather than duplicating them.
+In Gemini, run `/skills reload` and `/skills list`, then explicitly ask to use the
+`commit-it` skill. See [Gemini skills](https://geminicli.com/docs/cli/using-agent-skills/).
+
+Linux, macOS and WSL are the supported installer targets. Native Windows and cloud
+sessions are outside this local installer. File registration and runtime invocation
+are separate checks; missing agent executables are reported, not counted as verified.
+
+### Updates and existing installations
+
+Re-running an identical installation is a no-op. To update an installer-managed copy,
+review a fresh source checkout and run its installer with the same selection and
+`--update`. Recorded hashes must still match the current installation. Extra, modified,
+redirected or unmanaged files stop the update. `--dry-run` does not write files.
+
+If the shared source is your development Git checkout, link it using its own installer:
+
+```sh
+python3 "$HOME/Documents/skills/commit-it/scripts/install.py" --agent all
+```
+
+Update that checkout through its repository workflow. Do not replace it with a downloaded
+snapshot. Existing paths such as `~/.codex/skills/commit-it` require reviewed migration.
+Keep backups outside skill search locations and reconcile useful local changes before
+replacing directories with links. Do not blindly reset or clone over an installation.
 
 ## Use
 
-Invoke `$commit-it` with the requested scope, or let the agent select it for relevant
-delivery work. It does not grant permission to publish, merge, change protections,
-spend money or overwrite user work. Repository and user instructions take precedence.
+Start with `SKILL.md`. Follow applicable repository instructions, including `AGENTS.md`
+and `CLAUDE.md`, without replacing or consolidating them during installation. Review
+the concrete commit preview before authorizing execution. Loading the skill does not
+authorize publication, merge, protection changes, spending or overwriting work.
 
-Start with `SKILL.md`. Read `references/worker-coordination.md` when using named
-workers, and `references/pr-review.md` for review work. Explicit resolver assignments
-use the [conflict-resolution protocol](references/conflict-resolution.md) and its
-[copyable prompt](references/conflict-resolution.md#copyable-prompt). The optional protection helper
-requires Python 3 and an authenticated GitHub CLI, and changes protection only when
-you explicitly authorize that operation.
+Read [worker coordination](references/worker-coordination.md) for named workers and
+[PR review](references/pr-review.md) for review work. Reload the real source when another
+conversation may have updated it; existing context is not rewritten by filesystem changes.
+
+For an explicitly assigned resolver of a named PR set, read
+[conflict resolution](references/conflict-resolution.md). Ordinary worker authority is unchanged.
 
 ## Maintain
 
-This repository is the canonical reusable package. Keep personal account routing,
-private operations state, credentials and machine-specific settings outside it.
-Consumers can vendor the six package files with an exact source commit and SHA-256
-manifest. That provides a complete offline copy without a recursive submodule checkout.
-Update the source first, then review and advance the consumer's pin.
+This repository is the canonical reusable package. Keep private routing, host policy,
+credentials and machine-specific settings outside it. Use one local source with links
+for authoring and reviewed commit pins for distributed recovery snapshots.
 
-Run `python3 -m unittest discover -s tests` and `sh -n scripts/protect-branch.sh`.
+Ordinary policy edits do not bump the release version. Track working changes by content
+hash and Git state. Resolve pending related changes before selecting a release number.
+See [release policy](docs/releasing.md) and [unreleased changes](CHANGELOG.md).
+
+```sh
+python3 -m unittest discover -s tests
+sh -n scripts/protect-branch.sh
+python3 scripts/check_release.py
+```
 
 Created by [Sungyong Cho](https://sungyongcho.com).
