@@ -3,7 +3,9 @@
 Ordinary worker reviews are off by default. The implementing worker must request a
 review of its exact implementation scope, and a different conversation/task performs it.
 A delivery checkpoint, ready label or repository tracking opt-in is not a request.
-Do not review unrelated work, start a monitor or invent new implementation scope.
+The requested separate reviewer fixes clear defects within that scope on the same PR
+by default, then verifies the final head and records readiness. Do not review unrelated
+work, start a monitor or invent new implementation scope.
 
 ## Request and eligibility
 
@@ -16,37 +18,56 @@ Do not review unrelated work, start a monitor or invent new implementation scope
 - The implementing worker may request review but may not waive separation or authorize
   its own self-review. Only explicit user approval for the named self-review permits that
   exception. Record the approval and mark the result as self-review, never independent
-  or human approval. An implementation successor has the same restriction.
+  or human approval. An implementation successor has the same restriction. A separate
+  requested reviewer may contribute bounded repairs under the protocol below; retain
+  original-request provenance and disclose its contribution instead of treating it as
+  the original worker's self-approved review.
 - A named commit-error or conflict resolver follows its explicit action/scope grant in
   [conflict resolution](conflict-resolution.md); a role name alone does not grant self-review.
 - Use the configured guarded review request/publication operation where available. Check
   current owner, task separation or explicit exception, scope and head/base before writing.
   A request is not permission to create a new task if the runtime requires user authorization.
 
-## Review and publication
+## Review and repair
 
-1. Resolve the exact PR, base and head. Read the issue's acceptance checks when needed
-   to interpret the diff. Inspect changed behavior, direct callers/contracts and test
-   evidence; do not start a repository-wide audit by default.
-2. Report reproducible correctness, contract, data, authorization or material performance
-   problems. Style preferences, optional refactors and hypothetical risks are nonblocking.
-3. Distinguish executed checks from checks reported by the PR author. Pending CI is
-   pending verification, not proof of a product defect. Missing optional checks do not
-   justify rejection; a required or risk-critical missing check can block approval.
-4. Immediately before publishing, confirm the head still matches the reviewed commit.
-   Review a changed delta before deciding. Pin the review to that commit. Reuse the prior
-   result for unchanged heads rather than creating repetitive comments.
-5. Use `APPROVE` or `REQUEST_CHANGES` only when publication and that review action are
-   authorized and supported. If the signed-in account authored the PR, use `COMMENT`
-   with the same clear outcome; never claim it created a formal approval or change request.
-   A GitHub review can be submitted through `gh api .../pulls/<number>/reviews` using a
-   JSON input file with `commit_id`, `event`, and `body`. Preserve actual newlines.
+1. Resolve the request, original implementation worker/task, assigned PR, expected
+   head/base, acceptance scope and existing checks. Inspect only the changed behavior and
+   direct contracts/callers; no unrelated audit is authorized.
+2. Correct clear, reproducible implementation-scope defects directly. Before any edit,
+   declare the bounded repair scope/files and expected head/base in the OPS record,
+   ensure the original writer is paused, preserve its changes and use the same PR branch.
+   Set Draft/`OCCUPIED` and remove `MERGE_READY`. Re-read the claim and head/base immediately
+   before writing; actual concurrent writes or changed expectations stop that repair.
+3. Make the smallest coherent fix and meaningful regression test. Personal identity
+   authors/commits/pushes the repair to the same PR; OPS records original author/request,
+   reviewer-as-contributor, claimed files, repair commits and resulting head. Preserve
+   authorship/history. Do not force-push, create a replacement PR, merge, edit issue scope
+   or acquire unrelated ownership merely because review was requested.
+4. Reuse valid prior tests; rerun affected checks after corrections and verify the final
+   PR head/base and accepted implementation scope. Pending CI remains pending. Record
+   the actual repair range and state explicitly that the reviewer contributed corrections
+   and is not an independent reviewer of those corrections. This remains `Review: LGTM`
+   when the separate requested-review contract is satisfied; a new ID alone cannot create
+   that eligibility. Original implementation workers still need explicit user approval
+   for ordinary self-review.
+5. For complex intent, material scope changes, unclear correction direction or missing
+   authority, leave only the affected unit blocked with a focused question/change request
+   and preserve completed fixes. Do not invent extra requirements or use optional style
+   preferences as blockers. A fixable, clear in-scope defect should not be returned merely
+   as instructions for the original worker to implement.
+6. Publish the eligible result through the guarded OPS operation for the final head/base.
+   Use COMMENT when formal review approval is unsupported; a transport choice cannot
+   bypass eligibility. Return verified work to Ready/`REVIEW_READY` and add `MERGE_READY`
+   only after review, current checks and synchronized records pass. Release the temporary
+   repair claim without losing original ownership or contribution history. Neither ready
+   label grants automatic merge, deployment or main synchronization.
 
-For corrections, identify the actual issue number, exact file and current diff line,
-the concrete behavior to change, and the required recheck. Make the direction unambiguous.
-Judge the implementation against the agreed outcome and code evidence, not against an
-unpublished personal design. A further improvement is blocking only when necessary for
-the authorized outcome; otherwise keep it explicitly optional.
+For unresolved findings, identify the actual issue, exact file/current diff line, trigger,
+observed versus expected result and the decision/recheck required. Keep the review within
+the implementation's acceptance scope. Link detailed evidence, do not copy whole logs.
+Public request, repair and review receipts follow the
+[canonical Markdown contract](worker-coordination.md#public-record-format), with each field
+once and no public JSON payload. Machine-readable data and human summaries must not diverge.
 
 Implementation ends with verified `REVIEW_READY` delivery and no approval heading.
 For an eligible review, reuse the implementation and tester's passing evidence; inspect
@@ -58,16 +79,18 @@ Successful reviews use one exact first line, according to the actual assignment:
 | Approval heading | Applicable work |
 | --- | --- |
 | `Self-review: LGTM` | Own or inherited implementation only under explicit user-approved self-review for this scope. |
-| `Review: LGTM` | Implementing-worker-requested review in a different task without implementation ownership. |
+| `Review: LGTM` | Implementing-worker-requested review in a different task, including bounded same-PR repairs with reviewer-as-contributor disclosure. |
 | `Conflict resolution: LGTM` | Verified integration by the explicitly assigned `conflict-resolver` with review authority for the named PR set. |
 
 These are the only approval headings; never use bare `OK`, bare `LGTM`, or another
 variant. All require the same completed scope and verified evidence for the recorded
 head/base; none claims independent human approval or guarantees that every behavior
 was tested. Determine authorship from actual work, not the shared GitHub account.
-A successor accepting implementation ownership finishes at `REVIEW_READY`, including
-inherited work. It may self-review only with the user's explicit exception. Changing
-worker/model/account does not make the work independent. Publish through the configured
+A successor accepting the original implementation assignment finishes at `REVIEW_READY`,
+including inherited work, and may self-review only with the user's explicit exception.
+A separate requested reviewer making bounded repairs retains its review request and records
+its contributor role; its corrections are not independently reviewed. Changing worker,
+model or account alone does not make either case independent. Publish through the configured
 OPS identity where required and retain actual worker, task, request or exception evidence.
 
 Add the independent `MERGE_READY` label alongside `REVIEW_READY` only after a valid review,
@@ -99,40 +122,38 @@ For data and provider changes, check identity preservation, selected inputs, bud
 units, actual versus estimated usage, and safe schema behavior when relevant. Mock
 checks do not establish live database behavior.
 
-## Compact outcomes
+## Compact public outcomes
 
-Review of another worker's work:
+Use the guarded OPS renderer for requests, repair claims and results. Preserve the
+schema's exact raw keys and types rather than inventing another human-only field set.
+The result's first line is the eligible exact review heading; include implementation
+provenance, review task, final head/base, contribution, evidence and outcome once. For
+repairs, disclose that the reviewer contributed and its corrections are not independently
+reviewed. Ordinary self-review records the user's explicit scoped authorization.
 
-```markdown
-Review: LGTM
-
-Reviewed `<head>` against `<base>`: <changed behavior and direct contracts checked>.
-No blocking findings in this scope. Verification: <executed checks or clearly attributed PR evidence>.
-```
-
-Blocking finding (repeat only for independent defects):
-
-```markdown
-Changes requested — <CODE>
-
-[P1/P2] #<actual issue> · <path:line> — <concrete problem>
-- Trigger and result: <reproduction, observed behavior and expected behavior>.
-- Evidence: <code/failed check>; <why this prevents the assigned outcome>.
-- Required change and recheck: <observable correction and focused validation>.
-
-Reviewed head: `<head>`.
-```
-
-Omit the issue field only when no issue is assigned; never invent a number.
-Only for explicit user-approved self-review, use the same compact evidence format and
-include the approval reference with this exact first line:
+This request excerpt illustrates the canonical representation; resolve actual values
+and validate the full configured request schema before publication:
 
 ```markdown
-Self-review: LGTM
+<!-- ops:review-request:v2:<review-id> -->
+### Review requested
 
-Reviewed `<head>` against `<base>`: <own changed behavior and direct contracts checked>.
-No blocking findings in this scope. Verification: <executed checks or reused tester evidence>.
+- scope: <implementation scope>
+- worker: <implementing worker ID>
+- assignment: <assignment ID>
+- id: <review-id>
+- head: <full head SHA>
+- base: <full base SHA>
+- task: <implementation task ID>
+- issues: []
 ```
+
+For unresolved blockers, use the configured change-request outcome with code, exact
+issue/file/diff line, trigger, observed/expected behavior, evidence and required decision
+or recheck. Omit an unassigned issue rather than inventing its number. Preserve the
+reviewed head and do not copy an existing canonical record into a second JSON or prose
+payload. Render `Verification blocked — VERIFICATION` for missing required evidence
+instead of inventing a code defect. Historical review headings remain unchanged.
 
 Use P1 for serious failures of a normal flow and P2 for bounded failures that still need
 correction before the assigned scope is complete. Explain urgency with the impact;

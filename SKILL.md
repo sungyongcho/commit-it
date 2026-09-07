@@ -1,8 +1,8 @@
 ---
 name: commit-it
-description: Track requested features, fixes and GitHub delivery, prepare authorized issue-linked commits, perform scoped PR reviews, and resolve an explicitly assigned PR set through verified integration and authorized ordered merges.
+description: Track requested features, fixes and GitHub delivery, prepare authorized issue-linked commits, perform requested PR reviews and bounded repairs, and resolve an explicitly assigned PR set through verified integration and authorized ordered merges.
 metadata:
-  version: "3.0.0"
+  version: "4.0.0"
 ---
 
 # Commit It
@@ -14,7 +14,10 @@ and reread its current source and relevant references before use. Follow applica
 repository instructions, including AGENTS.md and CLAUDE.md, without replacing them.
 For requested changes to the skill itself, update the canonical source through its
 configured local maintenance workflow. Preserve concurrent edits and do not create an
-independent provider copy. Ordinary policy edits do not select a new release version.
+independent provider copy. When the user authorizes autonomous version maintenance, choose a semantic version
+bump when verified changes warrant one; do not bump merely because a conversation
+changed. Keep metadata, release notes and consumer pins consistent. Tag and Release
+publication remain separately authorized; see docs/releasing.md.
 
 ## Boundaries
 
@@ -94,6 +97,15 @@ tracking, report that limitation and continue safe local work within its authori
 do not invent issue numbers, links or completion. Leave the useful handoff record in
 GitHub, including remaining work and links, rather than requiring the next agent or
 human to reconstruct it from chat.
+
+Public OPS records use one concise heading and canonical Markdown fields/nested lists,
+readable by humans and strictly parsed by tools. Do not publish JSON fences, raw payload
+dumps or a second hidden JSON copy of the same metadata. Each datum has one authoritative
+field; link detailed evidence instead of repeating it. Follow the
+[record format and migration contract](references/worker-coordination.md#public-record-format).
+Normal runtime reads reject legacy JSON; only an explicitly authorized, audited migration
+may convert existing OPS-generated records in place. Preserve authors, IDs and semantic
+values, exclude human/unmanaged content, and never rewrite Git commits or history.
 
 ### Issue body format
 
@@ -375,18 +387,27 @@ only for an eligible request or an explicit user-approved exception.
 
 - Ordinary review requires the implementing worker's durable request and takes place
   in a different conversation/task, strictly within that implementation scope. Record the
-  requesting worker, implementation task, reviewer task, PR, head/base and outcome. A
-  changed worker name in the same conversation does not satisfy task separation. Do not
+  requesting worker, implementation task, reviewer task, PR, head/base and outcome. The
+  requested separate reviewer directly repairs clear defects within that implementation
+  scope on the same PR by default, then verifies and publishes the final result. A changed
+  worker name in the same conversation does not satisfy task separation. Do not
   spawn a new task without the runtime's required user authority; record a pending request.
 - Self-review is prohibited for ordinary workers unless the user explicitly approves it
   for the named scope. An implementing worker cannot approve its own exception. This
-  exception does not claim independent authorship or human review. A successor taking
-  implementation ownership follows the same rule, including for inherited code.
+  exception does not claim independent authorship or human review. An implementation
+  successor follows the same rule. A requested separate reviewer who makes bounded repairs
+  is instead disclosed as reviewer-as-contributor under the repair protocol; it cannot
+  claim independent review of its own corrections.
 - Reuse implementation/test evidence and inspect only the requested diff and direct
-  contracts/callers. No proactive unrelated review or wider audit is implied. Verification
+  contracts/callers. Before repair, pause the original writer, declare files/scope and
+  expected head/base, remove `MERGE_READY`, and use Draft/`OCCUPIED`. Commit and ordinarily
+  push scoped fixes personally to the same PR; OPS records the contribution and final
+  head. Leave change requests/questions only for complex intent, material scope changes,
+  unresolved authority or ambiguity. No unrelated review or wider audit is implied. Verification
   and final diff/scope checks remain part of implementation; they are not a PR approval.
 - Authorized successful reviews start exactly with `Review: LGTM` for a separate reviewer,
-  `Self-review: LGTM` for explicitly user-approved self-review, or `Conflict resolution: LGTM`
+  including disclosed repair-review when it contributed corrections, `Self-review: LGTM`
+  for explicitly user-approved original-worker self-review, or `Conflict resolution: LGTM`
   for an explicitly granted resolver review under [conflict resolution](references/conflict-resolution.md).
   Preserve historical headings; use a concrete `Changes requested` outcome for blockers.
 - A valid review plus current passing checks and matching PR head/base permits adding

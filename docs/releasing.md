@@ -8,7 +8,10 @@ Before a release, inspect current source, relevant installed variants, assigned 
 and related PRs. Reconcile completed changes without taking over active work. Choose
 the next version only after scope and verification are known: compatible fixes use
 patch, additive behavior uses minor, and incompatible documented interfaces use major.
-Follow [Semantic Versioning](https://semver.org/).
+Follow [Semantic Versioning](https://semver.org/). When the user has authorized autonomous
+version maintenance, make this decision and update metadata, release notes and verified
+consumer pins without asking again. A version-only bump without a meaningful change is
+unnecessary. This authorization does not itself publish a tag or GitHub Release.
 
 Commit subjects follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 and repository templates. Ordinary changes describe shipped behavior; a dedicated
