@@ -194,7 +194,8 @@ Preserve checkpoints, reconcile current ownership and stop only actual conflicti
 This does not expand merge, deployment, credential or published-history authority.
 
 Use the reference's Draft/Ready stages, authoritative work-state record, issue mirrors,
-OPS commit/PR receipts and managed `DEV`/`OPS`, `OCCUPIED`/`REVIEW_READY` labels. Provision
+OPS commit/PR receipts and managed `DEV`/`OPS`, `OCCUPIED`/`REVIEW_READY` labels, with
+`MERGE_READY` added only after eligible review and current verification. Provision
 missing labels only within setup authorization. Separate personal development commits
 and PR creation from configured OPS ownership/status/review writes; authenticate each
 operation independently. Keep personal mappings, host paths and credentials outside this
@@ -211,7 +212,9 @@ For an explicitly assigned resolver of a named PR set, read
 [conflict resolution](references/conflict-resolution.md) before editing or publishing.
 The mode preserves the actual worker ID and original authorship, records a versioned
 merge sequence, and permits `Conflict resolution: LGTM` only for verified integration.
-It does not expand ordinary worker permissions. Named merge authorization is separate
+A named commit-error or conflict resolver may close assigned PRs, edit assigned issues
+and self-review only under an explicit user grant for those actions and scope. It gains
+no general maintainer authority. Named merge authorization is separate
 from review approval; execute/resume an authorized sequence in the foreground using
 fresh head/base/tree evidence and actual merge receipts. The reference includes the
 complete copyable prompt; configure its model and reasoning effort in the launcher.
@@ -363,35 +366,36 @@ Default squash is a proposed merge method, not authorization to merge. Keep the 
 preview, approval, issue-creation, PR-publication, and branch-deletion boundaries. Do not
 introduce a PR into an explicitly direct-commit or local-only task merely to apply squash.
 
-## Quick PR Review
+## Requested PR Review
 
-When the user requests PR reviews or the repository opts into them, read
-[PR review guidance](references/pr-review.md). Review-only requests do not authorize
-implementation, issue management, merging, or unrelated cleanup.
+For worker delivery, implementation and verification finish at `REVIEW_READY`. Do not
+perform or publish an ordinary code review by default, at delivery checkpoints, or just
+because a repository enables tracking. Read [PR review guidance](references/pr-review.md)
+only for an eligible request or an explicit user-approved exception.
 
-- Default to a brief review of the exact diff, direct contracts/callers, and relevant
-  verification. Expand only for a concrete risk or finding. Reuse valid test evidence.
-- When assigned to review PRs made by others, identify work this agent actually created;
-  account authorship alone cannot distinguish workers sharing one GitHub account. A successor
-  who modifies inherited code uses `Self-review: LGTM`; changing workers is not independent review.
-- If review publication is authorized and the scope has no blockers, the first line must
-  be exactly `Self-review: LGTM` for work this agent authored or `Review: LGTM` for
-  another worker's work. Only an explicitly assigned conflict resolver may instead use
-  `Conflict resolution: LGTM` under the conflict-resolution reference. These are the
-  only approval headings; never use bare `OK`, bare `LGTM`, or another variant.
-  For blockers, use `Changes requested` with actionable
-  findings from the reference template. Record the reviewed head and scope; review the
-  new delta when the head changes.
-- A shared author account cannot formally approve or request changes on its own PR.
-  Publish the result as a comment review in that case and describe its actual state.
-- For an ordinary worker's own completed PRs, reuse the implementation and tester's passing
-  evidence, briefly review the final diff, and post `Self-review: LGTM` after required
-  record, label and Draft/Ready synchronization succeeds and no blocker remains.
-  Do not add another audit or repeat valid tests. Recheck only a relevant change or failure.
-  Do not present self-review as independent or human approval. Unfinished work and pending
-  required checks must not receive any approval heading.
-- Keep PR-only worker boundaries intact. No approval heading authorizes merge, local-main
-  integration, issue edits, or additional implementation. Do not repeat an unchanged review.
+- Ordinary review requires the implementing worker's durable request and takes place
+  in a different conversation/task, strictly within that implementation scope. Record the
+  requesting worker, implementation task, reviewer task, PR, head/base and outcome. A
+  changed worker name in the same conversation does not satisfy task separation. Do not
+  spawn a new task without the runtime's required user authority; record a pending request.
+- Self-review is prohibited for ordinary workers unless the user explicitly approves it
+  for the named scope. An implementing worker cannot approve its own exception. This
+  exception does not claim independent authorship or human review. A successor taking
+  implementation ownership follows the same rule, including for inherited code.
+- Reuse implementation/test evidence and inspect only the requested diff and direct
+  contracts/callers. No proactive unrelated review or wider audit is implied. Verification
+  and final diff/scope checks remain part of implementation; they are not a PR approval.
+- Authorized successful reviews start exactly with `Review: LGTM` for a separate reviewer,
+  `Self-review: LGTM` for explicitly user-approved self-review, or `Conflict resolution: LGTM`
+  for an explicitly granted resolver review under [conflict resolution](references/conflict-resolution.md).
+  Preserve historical headings; use a concrete `Changes requested` outcome for blockers.
+- A valid review plus current passing checks and matching PR head/base permits adding
+  `MERGE_READY` alongside `REVIEW_READY`; it does not replace the work status. Reconcile
+  the record and labels before reporting readiness. Remove `MERGE_READY` when edits,
+  head/base changes, a required check failure or an invalid review invalidate its evidence.
+- Publish through the configured OPS identity where required and use COMMENT when formal
+  self-approval is unavailable. No heading or either ready label grants merge, issue-edit,
+  deployment or local-main authority. Do not repeat an unchanged review.
 
 ## Tutorial and Documentation Checkpoint
 

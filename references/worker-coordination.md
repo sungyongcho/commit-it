@@ -14,7 +14,8 @@ titles are optional navigation aids, never the only location of checkpoints or a
 
 - The coordinator handles authorized intake, scope and allocation. Ordinary workers
   implement an approved assignment in persistent isolated worktrees, verify it and
-  deliver its PR and review. They do not inherit coordinator merge or checkout rights.
+  deliver its PR at `REVIEW_READY`. Review is a separate, requested step; they do not
+  inherit coordinator merge or checkout rights.
 - Preserve user-supplied IDs, including legacy names such as `worker-1`. If none is
   supplied, allocate `<client>-<YYYYMMDDTHHMMSSZ>-<8 lowercase hex digits>`, using UTC
   and a random suffix; for example `codex-20260907T190000Z-a1b2c3d4`. Verify against
@@ -120,7 +121,8 @@ A returning old worker must re-read current ownership before any mutation and st
 former assignment after transfer unless explicitly reassigned. Succession authorizes
 preservation, implementation and the already approved delivery scope; it does not grant
 merge, deployment, credential, paid-work or force-push authority. A successor modifying
-inherited code uses `Self-review: LGTM`, not independent `Review: LGTM`.
+inherited code cannot self-review without explicit user approval and must not present
+that exception as independent `Review: LGTM`.
 
 ## OPS records, labels and transitions
 
@@ -146,13 +148,16 @@ per-worker labels or a Project board. Labels summarize records and never lock ow
 | --- | --- |
 | Work kind | Exactly one of `DEV` or `OPS`, determined by task purpose, not API author. Product implementation is `DEV`; operational tooling and workflow policy are `OPS`. |
 | Work status | Exactly one of `OCCUPIED` or `REVIEW_READY` on active managed issues/PRs. |
+| Review readiness | Add `MERGE_READY` alongside `REVIEW_READY` only after eligible review and current passing head/base/check evidence; this is an independent label, not a new Work status. |
 | Blocked | Keep `OCCUPIED` and put the concrete blocker and next action in verification. |
 
 For multiple assignments on one issue, derive the issue state from all current records:
 any unfinished, running or blocked assignment makes it `OCCUPIED`; only all completed,
 verified assignments make it `REVIEW_READY`. Apply `OPS` only to wholly operational scope;
 use `DEV` when the combined issue includes product implementation. Preserve individual
-assignment kinds in records. Missing or inconsistent records block a readiness claim.
+assignment kinds in records. Add issue `MERGE_READY` only when every current assignment
+has eligible review and matching current evidence; remove it if any loses eligibility.
+Missing or inconsistent records block a readiness claim.
 
 1. **Assign/open:** check claims and record `OCCUPIED` before implementation. Create a
    Draft PR at the first meaningful pushed change and mirror its actual link to issues.
@@ -160,15 +165,25 @@ assignment kinds in records. Missing or inconsistent records block a readiness c
 2. **Work/revise:** keep Draft/`OCCUPIED` during implementation, waiting, failures or
    required checks. Before revising a ready PR, return its state and mirrors to occupied.
    Verification is `not run`, `running`, `passed`, `failed` or `blocked: <reason>`.
-3. **Ready:** only after scope, checks and writer work finish, synchronize authoritative
-   state, issue mirrors, labels and Draft/Ready status. Read back all required targets;
-   interrupted synchronization remains incomplete and must be reconciled before claiming
-   readiness. A changed head invalidates old review evidence. Post `Self-review: LGTM`
-   for own completed work or `Review: LGTM` for peer review without implementation.
-   Only the explicit resolver may use `Conflict resolution: LGTM` under its extra gates.
-4. **Finish:** only after an authorized maintainer merge, reconcile actual merge/issue
-   receipts under that authority. A worker never infers merged status from readiness.
-   Partial delivery keeps remaining scope open; no label grants permission to close it.
+3. **Review ready:** after implementation, checks and writer work finish, set
+   `REVIEW_READY`, synchronize authoritative state, mirrors, labels and PR Ready status.
+   Verify all updates before claiming readiness. The ordinary implementing worker is done;
+   do not automatically review its own or other workers' code or post an approval heading.
+4. **Requested review:** the implementing worker records its exact scope and requests review
+   in a different conversation/task under [review eligibility](pr-review.md#request-and-eligibility).
+   Record both task IDs, actual workers and head/base evidence. A worker cannot authorize
+   its own self-review; only an explicit user-approved exception permits `Self-review: LGTM`.
+   Eligible separate reviews use `Review: LGTM`; an explicitly granted resolver may use
+   `Conflict resolution: LGTM` under its additional gates.
+5. **Merge ready:** add `MERGE_READY` alongside `REVIEW_READY` only with a valid eligible
+   review and current passing checks for the matching head/base. Re-read all records and
+   labels; partial synchronization is not readiness. Remove `MERGE_READY` on new edits,
+   changed head/base, failed required checks or invalid review. Return to Draft/`OCCUPIED`
+   before further implementation. Neither readiness label grants merge authority.
+6. **Finish:** only after an authorized maintainer or resolver merge, reconcile actual
+   merge/issue receipts under that authority. Partial delivery leaves scope open. Named
+   commit-error/conflict resolvers may close assigned PRs or edit assigned issues only if
+   those actions are explicitly granted; no global maintainer rights are implied.
 
 Re-read ownership and head immediately before mutations. Update only owned records;
 ambiguous matches, changed owners and partial writes require reconciliation. A peer

@@ -99,10 +99,12 @@ class PackageTests(unittest.TestCase):
         prompts = [body for kind, body in blocks if body.startswith('Use $commit-it in conflict-resolution mode.')]
         self.assertEqual(len(prompts), 1)
         prompt = prompts[0]
-        fields = dict(re.findall(r'^(Repository|Target PRs|Base branch|Resolver ID|Merge authorization|Merge method): (.+)$', prompt, re.MULTILINE))
+        fields = dict(re.findall(r'^(Repository|Target PRs|Base branch|Resolver ID|Merge authorization|Review authorization|Merge method): (.+)$', prompt, re.MULTILINE))
         self.assertEqual(fields, {'Repository': '<owner/repository>', 'Target PRs': '<PR list>',
             'Base branch': '<base>', 'Resolver ID': '<actual worker ID>',
-            'Merge authorization': 'granted for this named PR set', 'Merge method': 'squash'})
+            'Merge authorization': 'granted for this named PR set',
+            'Review authorization': 'user-approved resolver self-review for this named PR set',
+            'Merge method': 'squash'})
         self.assertNotIn('gpt-6-astra', prompt)
         self.assertIn('model `gpt-6-astra`, reasoning effort\n`high`', text.replace(prompt, ''))
         self.assertIn('On resume, reconcile live state and never repeat an already completed merge.', prompt)

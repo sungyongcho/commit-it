@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- End ordinary worker delivery at REVIEW_READY; require an implementing-worker review
+  request and a different task, with ordinary self-review only by explicit user approval.
+- Add MERGE_READY alongside REVIEW_READY after eligible review and current head/base/checks;
+  invalidate it when the underlying evidence changes without granting merge authority.
+- Permit named commit-error/conflict resolvers to close assigned PRs, edit assigned issues
+  and self-review only under explicit scoped grants; retain original authors and history.
+
 ## 3.0.0 - 2026-09-07
 
 - Replace predecessor-acknowledged ownership transfer with explicit user-approved succession,

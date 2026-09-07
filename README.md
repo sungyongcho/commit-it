@@ -124,6 +124,10 @@ for the major version, not an incompatible storage migration.
 
 The coordination reference defines collision-checked IDs, assignment lineage, OPS
 ownership/commit receipts, and `DEV`/`OPS` plus `OCCUPIED`/`REVIEW_READY` label synchronization.
+Ordinary implementation ends at `REVIEW_READY`. Code review requires the implementing
+worker's request and a different task; ordinary self-review needs explicit user approval.
+A valid review and current head/base/checks add `MERGE_READY` alongside `REVIEW_READY`.
+Neither label grants merge rights; new edits or invalidated evidence remove `MERGE_READY`.
 Personal accounts still author development commits and create PRs when the repository
 separates those actions from OPS records. Labels do not grant ownership or merge authority.
 

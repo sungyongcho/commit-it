@@ -1,8 +1,27 @@
 # Focused Pull Request Reviews
 
-Use this mode for an explicitly requested review or a repository-authorized review
-checkpoint. Where the repository requests peer review at delivery, preserve the
-assigned implementation queue and review only the relevant delta. Do not create a monitor.
+Ordinary worker reviews are off by default. The implementing worker must request a
+review of its exact implementation scope, and a different conversation/task performs it.
+A delivery checkpoint, ready label or repository tracking opt-in is not a request.
+Do not review unrelated work, start a monitor or invent new implementation scope.
+
+## Request and eligibility
+
+- Preserve a durable request with implementing worker, Assignment, PR, implementation
+  task identifier, requested scope, exact head/base and existing verification evidence.
+  The reviewer records a different task identifier and its actual worker ID. A new model
+  or ID in the same task is not a separate review. If task identity cannot be established,
+  leave review pending instead of asserting separation. Missing chat history does not
+  block ordinary user-approved succession; only review eligibility needs this evidence.
+- The implementing worker may request review but may not waive separation or authorize
+  its own self-review. Only explicit user approval for the named self-review permits that
+  exception. Record the approval and mark the result as self-review, never independent
+  or human approval. An implementation successor has the same restriction.
+- A named commit-error or conflict resolver follows its explicit action/scope grant in
+  [conflict resolution](conflict-resolution.md); a role name alone does not grant self-review.
+- Use the configured guarded review request/publication operation where available. Check
+  current owner, task separation or explicit exception, scope and head/base before writing.
+  A request is not permission to create a new task if the runtime requires user authorization.
 
 ## Review and publication
 
@@ -29,33 +48,37 @@ Judge the implementation against the agreed outcome and code evidence, not again
 unpublished personal design. A further improvement is blocking only when necessary for
 the authorized outcome; otherwise keep it explicitly optional.
 
-For an ordinary worker's completed PR, reuse the implementation and tester's passing evidence.
-After required record, label and Draft/Ready synchronization succeeds, briefly inspect
-the final diff and post `Self-review: LGTM` if it has no blocker; do not add a second audit or rerun valid tests. Recheck only a relevant new
-change or failure and name the reviewed head. An unfinished scope, known blocker or
-pending required check must not receive any approval heading.
+Implementation ends with verified `REVIEW_READY` delivery and no approval heading.
+For an eligible review, reuse the implementation and tester's passing evidence; inspect
+the requested delta and rerun checks only for a relevant change or failure. An unfinished
+scope, known blocker or pending required check must not receive any approval heading.
 
 Successful reviews use one exact first line, according to the actual assignment:
 
 | Approval heading | Applicable work |
 | --- | --- |
-| `Self-review: LGTM` | Work the reviewer authored. |
-| `Review: LGTM` | Another worker's work reviewed without taking ownership. |
-| `Conflict resolution: LGTM` | Verified integration by the explicitly assigned `conflict-resolver` for the named PR set. |
+| `Self-review: LGTM` | Own or inherited implementation only under explicit user-approved self-review for this scope. |
+| `Review: LGTM` | Implementing-worker-requested review in a different task without implementation ownership. |
+| `Conflict resolution: LGTM` | Verified integration by the explicitly assigned `conflict-resolver` with review authority for the named PR set. |
 
 These are the only approval headings; never use bare `OK`, bare `LGTM`, or another
 variant. All require the same completed scope and verified evidence for the recorded
 head/base; none claims independent human approval or guarantees that every behavior
 was tested. Determine authorship from actual work, not the shared GitHub account.
-A successor who edits inherited code uses `Self-review: LGTM`, preserves earlier
-worker attribution and links the reused verification. A new worker/model/account is
-not independent review by itself. A separate review-only assignment may use `Review: LGTM` only
-without taking implementation ownership or implementing the reviewed work. A successor
-accepting implementation ownership reports completion as self-review, including inherited work. Publish through the configured OPS review
-identity when required; the record still identifies the actual reviewing worker.
-A review never grants permission to merge or deploy. A conflict resolver preserves
-original authorship and follows the additional tree/sequence requirements in
-[conflict resolution](conflict-resolution.md); ordinary reviews do not activate it.
+A successor accepting implementation ownership finishes at `REVIEW_READY`, including
+inherited work. It may self-review only with the user's explicit exception. Changing
+worker/model/account does not make the work independent. Publish through the configured
+OPS identity where required and retain actual worker, task, request or exception evidence.
+
+Add the independent `MERGE_READY` label alongside `REVIEW_READY` only after a valid review,
+current passing required checks and matching recorded/current head and base. Preserve the
+review receipt and approval basis; an OPS author alone is not eligibility proof. If any
+of those facts changes, remove `MERGE_READY` until the affected evidence is renewed.
+New implementation returns to Draft/`OCCUPIED`; record and mirrors must agree. Keep earlier
+reviews as history rather than rewriting their labels or claiming they cover new code.
+Neither ready label nor any review heading grants merge, issue-edit or deployment rights.
+An explicit resolver preserves original authors and follows the extra tree/sequence gates
+in [conflict resolution](conflict-resolution.md); ordinary reviews do not activate them.
 
 ## Project-oriented reason codes
 
@@ -101,7 +124,8 @@ Reviewed head: `<head>`.
 ```
 
 Omit the issue field only when no issue is assigned; never invent a number.
-For a self-review completion, use the same compact evidence format with this exact first line:
+Only for explicit user-approved self-review, use the same compact evidence format and
+include the approval reference with this exact first line:
 
 ```markdown
 Self-review: LGTM
