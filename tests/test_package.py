@@ -21,6 +21,24 @@ class PackageTests(unittest.TestCase):
                 if '://' not in link and not link.startswith('#'):
                     self.assertTrue((file.parent / link.split('#')[0]).exists(), link)
 
+    def test_work_record_retains_legacy_marker_and_additive_lineage_fields(self):
+        """Validate the copyable record without requiring clients to migrate v1 data."""
+        text = (ROOT / 'references/worker-coordination.md').read_text()
+        records = re.findall(r'```markdown\n(<!-- commit-it:work-state:v1 -->[\s\S]*?)```', text)
+        self.assertEqual(len(records), 1)
+        record = records[0]
+        pairs = re.findall(r'^- ([^:]+): (.+)$', record, re.MULTILINE)
+        fields = dict(pairs)
+        self.assertEqual(len(pairs), len(fields), 'duplicate work-state field')
+        self.assertTrue({'Work status', 'Worker', 'Assignment', 'Scope', 'Issues',
+                         'PR', 'Verification', 'Updated'} <= fields.keys())
+        self.assertEqual(fields['Previous worker'], 'worker-1')
+        self.assertEqual(int(fields['Handoff revision']), 1)
+        self.assertRegex(fields['Worker'], r'^codex-\d{8}T\d{6}Z-[0-9a-f]{8}$')
+        self.assertIn('<!-- /commit-it:work-state -->', record)
+        self.assertNotEqual(fields['Worker'], fields['Previous worker'])
+        self.assertEqual(fields['Work status'], 'OCCUPIED')
+
     def test_package_excludes_private_operations_configuration(self):
         for file in [ROOT / 'SKILL.md', *ROOT.joinpath('references').glob('*.md'), ROOT / 'agents/openai.yaml']:
             text = file.read_text()

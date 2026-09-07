@@ -8,8 +8,10 @@ this mode. User and repository authority still govern every action.
 
 - Record role `conflict-resolver` with the resolver's actual worker ID, named input
   PRs, base branch and allowed actions. A role is not a new identity. Preserve source
-  authorship, earlier worker records, unrelated changes and active worktrees. Confirm
-  affected writers have stopped before editing their branches; do not take over an
+  authorship, earlier worker records, unrelated changes and active worktrees. Follow
+  [user-approved succession](worker-coordination.md#user-approved-succession) for a
+  transfer: explicit user approval suffices without predecessor acknowledgement.
+  Preserve checkpoints and pause actual conflicting writes; do not take over an
   unassigned PR or infer authority from a shared account.
 - Resolve the named PRs' accepted requirements, defects and cross-PR interactions.
   Ordinary workers retain their existing PR-only boundaries. Resolver assignment

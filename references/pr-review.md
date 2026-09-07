@@ -30,8 +30,8 @@ unpublished personal design. A further improvement is blocking only when necessa
 the authorized outcome; otherwise keep it explicitly optional.
 
 For an ordinary worker's completed PR, reuse the implementation and tester's passing evidence.
-Briefly inspect the final diff and immediately post `Self-review: LGTM` if it has no
-blocker; do not add a second audit or rerun valid tests. Recheck only a relevant new
+After required record, label and Draft/Ready synchronization succeeds, briefly inspect
+the final diff and post `Self-review: LGTM` if it has no blocker; do not add a second audit or rerun valid tests. Recheck only a relevant new
 change or failure and name the reviewed head. An unfinished scope, known blocker or
 pending required check must not receive any approval heading.
 
@@ -47,6 +47,12 @@ These are the only approval headings; never use bare `OK`, bare `LGTM`, or anoth
 variant. All require the same completed scope and verified evidence for the recorded
 head/base; none claims independent human approval or guarantees that every behavior
 was tested. Determine authorship from actual work, not the shared GitHub account.
+A successor who edits inherited code uses `Self-review: LGTM`, preserves earlier
+worker attribution and links the reused verification. A new worker/model/account is
+not independent review by itself. A separate review-only assignment may use `Review: LGTM` only
+without taking implementation ownership or implementing the reviewed work. A successor
+accepting implementation ownership reports completion as self-review, including inherited work. Publish through the configured OPS review
+identity when required; the record still identifies the actual reviewing worker.
 A review never grants permission to merge or deploy. A conflict resolver preserves
 original authorship and follows the additional tree/sequence requirements in
 [conflict resolution](conflict-resolution.md); ordinary reviews do not activate it.

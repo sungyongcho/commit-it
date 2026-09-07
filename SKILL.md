@@ -2,7 +2,7 @@
 name: commit-it
 description: Track requested features, fixes and GitHub delivery, prepare authorized issue-linked commits, perform scoped PR reviews, and resolve an explicitly assigned PR set through verified integration and authorized ordered merges.
 metadata:
-  version: "2.9.0"
+  version: "3.0.0"
 ---
 
 # Commit It
@@ -51,6 +51,11 @@ permission for scoped issue/PR tracking. Without that permission or a direct req
 prepare the proposed external update and obtain the missing authorization. Tracking
 permission alone never implies commit, push, PR publication, merge or branch deletion.
 An explicitly approved delivery sequence should proceed without repeated approval.
+Where operational writes use a configured OPS account or guarded command, route
+claims, labels, progress, commit receipts and review comments through that interface.
+The `gh` examples below describe operations, not permission to bypass account routing
+or worker restrictions on issue-body edits. Development commits and PR creation keep
+the repository's personal author identity, including both commit author and committer.
 
 1. **Start:** use `gh issue list/view` and `gh pr list/view` for the current task only.
    Reuse the related issue/PR. When creation is authorized and no match exists, create
@@ -175,16 +180,30 @@ work; intake alone does not start implementation or create a background service.
 
 ### Coordinator and worker ownership
 
-When the user adopts a coordinator with named workers, read
-[worker coordination](references/worker-coordination.md). Use the user-assigned IDs,
-Draft/Ready PR stages, an authoritative PR work-state block and issue status mirrors.
-Separate ownership from verification and authenticate messages with the intended
-account/App; a commit email does not set the issue/PR author. This opt-in mode does
-not expand repository permissions or create accounts, labels, Projects or background jobs.
+When the user assigns workers or requests succession, read
+[worker coordination](references/worker-coordination.md). Workers are replaceable
+execution owners, not permanent conversations. Preserve continuity through project
+assignments, issues, PRs, commits and reproducible verification. Later models improve
+inherited work through tests; a model change alone is neither new evidence nor a reason
+to discard valid work. Archived or deleted chats must not prevent approved succession.
 
-When a repository separates development authorship from operational records,
-follow its repository or global identity policy. Keep personal account mappings,
-local paths, credentials and deployment configuration outside this reusable skill.
+Preserve supplied worker IDs. Otherwise allocate `<client>-<UTC timestamp>-<8 hex digits>`
+and check project records for collisions. Keep assignment lineage and handoff revisions;
+explicit user approval is sufficient to transfer named work without predecessor acknowledgement.
+Preserve checkpoints, reconcile current ownership and stop only actual conflicting writers.
+This does not expand merge, deployment, credential or published-history authority.
+
+Use the reference's Draft/Ready stages, authoritative work-state record, issue mirrors,
+OPS commit/PR receipts and managed `DEV`/`OPS`, `OCCUPIED`/`REVIEW_READY` labels. Provision
+missing labels only within setup authorization. Separate personal development commits
+and PR creation from configured OPS ownership/status/review writes; authenticate each
+operation independently. Keep personal mappings, host paths and credentials outside this
+package. No account, App, Project or background job creation is implied.
+
+At assignment or handoff, use available official tools to name the current conversation
+`<short scope> | <project summary> | <short worker id>`. Verify the result; capability
+absence only requires a suggested title, not blocked implementation. See the reference
+for platform-specific paths and fallback rules.
 
 ### Explicit conflict-resolution mode
 
@@ -353,7 +372,8 @@ implementation, issue management, merging, or unrelated cleanup.
 - Default to a brief review of the exact diff, direct contracts/callers, and relevant
   verification. Expand only for a concrete risk or finding. Reuse valid test evidence.
 - When assigned to review PRs made by others, identify work this agent actually created;
-  account authorship alone cannot distinguish workers sharing one GitHub account.
+  account authorship alone cannot distinguish workers sharing one GitHub account. A successor
+  who modifies inherited code uses `Self-review: LGTM`; changing workers is not independent review.
 - If review publication is authorized and the scope has no blockers, the first line must
   be exactly `Self-review: LGTM` for work this agent authored or `Review: LGTM` for
   another worker's work. Only an explicitly assigned conflict resolver may instead use
@@ -365,7 +385,8 @@ implementation, issue management, merging, or unrelated cleanup.
 - A shared author account cannot formally approve or request changes on its own PR.
   Publish the result as a comment review in that case and describe its actual state.
 - For an ordinary worker's own completed PRs, reuse the implementation and tester's passing
-  evidence, briefly review the final diff, and post `Self-review: LGTM` immediately if unblocked.
+  evidence, briefly review the final diff, and post `Self-review: LGTM` after required
+  record, label and Draft/Ready synchronization succeeds and no blocker remains.
   Do not add another audit or repeat valid tests. Recheck only a relevant change or failure.
   Do not present self-review as independent or human approval. Unfinished work and pending
   required checks must not receive any approval heading.

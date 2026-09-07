@@ -114,6 +114,23 @@ Read [worker coordination](references/worker-coordination.md) for named workers 
 [PR review](references/pr-review.md) for review work. Reload the real source when another
 conversation may have updated it; existing context is not rewritten by filesystem changes.
 
+### Worker succession in 3.0.0
+
+Workers are replaceable execution owners. Project assignments, commits, PRs and tested
+checkpoints preserve continuity when chats disappear or a later model takes over.
+Explicit user approval transfers named work without waiting for a predecessor response;
+existing IDs and v1 records remain valid. The changed transfer contract is the reason
+for the major version, not an incompatible storage migration.
+
+The coordination reference defines collision-checked IDs, assignment lineage, OPS
+ownership/commit receipts, and `DEV`/`OPS` plus `OCCUPIED`/`REVIEW_READY` label synchronization.
+Personal accounts still author development commits and create PRs when the repository
+separates those actions from OPS records. Labels do not grant ownership or merge authority.
+
+Conversation names follow `<short scope> | <project summary> | <short worker id>`.
+Use supported official tools and verify the new title; otherwise provide the suggested
+title without blocking development. Chat titles and IDs are optional lookup aids.
+
 For an explicitly assigned resolver of a named PR set, read
 [conflict resolution](references/conflict-resolution.md). Ordinary worker authority is unchanged.
 
