@@ -32,7 +32,7 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(len(result['targets']), 2)
         self.assertTrue((self.destination / 'references/test.md').is_file())
         for path in result['targets']:
-            self.assertEqual(Path(path).resolve(), self.destination)
+            self.assertTrue(Path(path).samefile(self.destination))
         self.assertEqual(self.run_install()['files'], result['files'])
 
     def test_dry_run_does_not_create_files(self):
