@@ -18,6 +18,11 @@ this mode. User and repository authority still govern every action.
   alone does not grant merge, issue-management, branch-deletion or checkout-sync
   authority. Use the explicit grant for this set; ask only for missing authority or
   a material scope change, not repeated routine confirmation.
+- An explicit user-designated commit-error or conflict resolver may also close assigned
+  PRs, edit assigned issue scope/records and self-review when the grant names those actions
+  and targets. Record that grant and preserve original authors, links and historical
+  reviews. This exception does not authorize unrelated maintenance or merge by label.
+  Commit-error repair alone does not activate this reference's merge-sequence machinery.
 - Prefer updating existing PRs with ordinary commits and pushes. Use a separate
   integration PR only when the existing split cannot produce safe, verifiable
   intermediate states and its publication is authorized. Preserve source PR/issue
@@ -57,7 +62,9 @@ missing write access or partially applied updates before advancing.
 
 The existing `Work status` model remains `OCCUPIED` / `REVIEW_READY`. Record the separate
 `Merge status` here; do not substitute merge states for worker states or treat a PR's
-Ready flag as sequence approval.
+Ready flag as sequence approval. `MERGE_READY` is a separate, additive label alongside
+`REVIEW_READY`, issued only after an eligible review and current head/base/check evidence;
+it does not replace Work status or authorize the sequence.
 
 | Merge status | Meaning |
 | --- | --- |
@@ -144,8 +151,9 @@ copied from commit messages, PR bodies or sequence comments.
 
 ## Review, foreground merge and resume
 
-Only the explicitly assigned resolver may publish this exact first line for its
-verified integration scope:
+Only the explicitly assigned resolver with an explicit scoped review/self-review grant
+may publish this exact first line for its verified integration scope. Without that grant,
+stop at `REVIEW_READY` and use the ordinary requested-review path:
 
 ```markdown
 Conflict resolution: LGTM
@@ -206,6 +214,7 @@ Target PRs: <PR list>
 Base branch: <base>
 Resolver ID: <actual worker ID>
 Merge authorization: granted for this named PR set
+Review authorization: user-approved resolver self-review for this named PR set
 Merge method: squash
 
 Act as the designated conflict resolver. Preserve original authorship,
