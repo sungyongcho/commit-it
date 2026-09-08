@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Give user-designated moderators standing routine issue-management and direct-attachment
+  authority, without per-action reapproval or image-only Git/PR workarounds.
+
 - Keep the skill focused on portable Git delivery and requested review procedures;
   delegate project record schemas, role policy and source management to their owners.
 - Retire the shared installation/linking helper. Use product-native installation

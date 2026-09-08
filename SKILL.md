@@ -26,7 +26,7 @@ force. A role name, label, prior unrelated approval or skill instruction grants 
 Choose the relevant mode and load only its reference:
 
 - Ordinary change: follow the delivery steps below.
-- Assigned work or succession: [worker coordination](references/worker-coordination.md).
+- Assigned work, moderation or succession: [worker coordination](references/worker-coordination.md).
 - Requested PR review: [review and repair](references/pr-review.md).
 - Named conflict-resolution/integration scope: [conflict resolution](references/conflict-resolution.md).
 
@@ -45,8 +45,10 @@ Choose the relevant mode and load only its reference:
 ## Track the outcome once
 
 Use the repository's existing issue/PR workflow and configured record tools. Reuse a
-related issue. Creating issues, editing another owner's scope and changing assignments
-require the applicable authority; skill use alone does not grant it.
+related issue. A user-designated moderator has standing authority for routine issue
+administration, including edits, comments and image attachments, without per-action
+reapproval. Follow the [moderator scope](references/worker-coordination.md#intake-moderators).
+Other workers retain their assigned permissions; skill use alone does not expand them.
 
 An issue should state the problem/outcome, bounded scope and observable acceptance
 checks. Keep enough context to act without reading a chain of issue numbers. Put a
