@@ -192,6 +192,14 @@ work; intake alone does not start implementation or create a background service.
   them. Fetch before integration, preserve active workers' checkouts and dirty work,
   and sync the correct integration checkout. No idle polling or unassigned backlog work.
 
+### Intake moderators
+
+When the user assigns intake or coordination, follow the repository's MODERATOR.md if
+present and the [intake guidance](references/worker-coordination.md#intake-moderators).
+Reuse related work, classify each report once and size by coherent outcomes. Keep held
+drafts in chat unless the user requests another destination. Moderator notes do not claim
+product implementation ownership; merge, close and publication authority remain scoped.
+
 ### Coordinator and worker ownership
 
 When the user assigns workers or requests succession, read

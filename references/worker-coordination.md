@@ -270,3 +270,32 @@ references: [Codex App Server](https://learn.chatgpt.com/docs/app-server),
 [Codex CLI commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli),
 [Claude Code sessions](https://code.claude.com/docs/en/sessions), and
 [Claude Code Desktop](https://code.claude.com/docs/en/desktop#work-across-sessions).
+
+## Intake moderators
+
+A user-designated moderator owns intake and coordination, not product implementation.
+Use the repository's MODERATOR.md for project-specific routes and evidence locations.
+
+- Reuse the round's related issue/ownership snapshot, then recheck affected owner/head/body
+  before writes. Avoid scanning every PR or repeating unchanged dispositions.
+- Classify each report as duplicate, additive, new or held. Add only new evidence to a
+  duplicate; reconcile additive scope through the authorized issue note/body workflow.
+  A demonstrated regression after a completed fix needs a linked active record, not an
+  automatic reopen. Preserve acceptance intent and valid verification when criteria change.
+- Size by independently verifiable outcomes and shared contracts. A small actionable issue
+  can stay small; research or a check count alone does not justify splitting. Preserve a
+  user-declared single-worker epic. Held drafts stay in the chat/handoff summary and are
+  revisited next round; never create automatic persistent-memory copies.
+- Notify a product owner through its linked issue and the round summary. Ready work normally
+  receives a linked follow-up for added scope unless the user directs a scope change.
+  Do not claim its assignment or bypass a non-owner PR-write restriction. An evidence or
+  policy PR actually owned by the moderator follows ordinary owned delivery records.
+- Prefer existing durable evidence; check privacy, preserve originals and distinguish
+  historical captures from reproductions. Publish only under the relevant authority, then
+  link the immutable artifact. The role itself grants no merge, close or checkout rights.
+- Batch scoped records, serialize writes and use bounded tool-guided backoff. Missing
+  capabilities or runtime refusals never authorize another account/tool bypass.
+
+Report one compact table per batch: report, disposition, destination, next action.
+Anything the implementation owner must act on belongs in the authorized GitHub record;
+chat carries decisions and held drafts, not a competing repository backlog.

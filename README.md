@@ -178,3 +178,10 @@ list without executing an unreviewed installer. Tests, CI, `.git` and local main
 instructions remain in the authoring repository, outside copied release packages.
 A copy records a source commit only when all packaged bytes match that repository's
 HEAD; unpublished edits are not mislabeled as the committed release.
+
+### Intake coordination
+
+A user-designated moderator can triage report batches using the repository's MODERATOR.md
+and the [intake guidance](references/worker-coordination.md#intake-moderators). It reuses
+related issues, records scoped additions/evidence and keeps held drafts in chat. Product
+implementation ownership and merge/closure authority remain separate.
