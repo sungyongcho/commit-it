@@ -126,12 +126,15 @@ OPS-generated records in place, excluding human/unmanaged content and Git histor
 
 The coordination reference defines collision-checked IDs, assignment lineage, OPS
 ownership/commit receipts, and `DEV`/`OPS` plus `OCCUPIED`/`REVIEW_READY` label synchronization.
-Ordinary implementation ends at `REVIEW_READY`. Code review requires the implementing
-worker's request and a different task; ordinary self-review needs explicit user approval.
-The separate reviewer directly fixes clear in-scope defects on the same PR, pauses the
-original writer, and records its contribution. It does not claim independent review of
-its own corrections. A valid review of the final head plus current checks adds
-`MERGE_READY` alongside `REVIEW_READY`.
+Ordinary implementation completes at `REVIEW_READY`. The user can open a different task
+and explicitly request review, or the implementer can record a request. A user request
+covers autonomous in-scope review/repair, personal commits, ordinary pushes, guarded rebase
+and expected-SHA lease publication, and task/OPS coordination through `MERGE_READY`.
+The reviewer can register its user origin without an implementer round trip. Ready/paused
+scopes need no predecessor acknowledgement; actual overlapping writers block repair.
+Ordinary self-review still needs explicit user approval. Reviewer repairs are disclosed,
+not independently reviewed. Rebase onto the current base and verify final head/base before
+adding `MERGE_READY`; foreground base drift invalidates it until affected evidence is renewed.
 Neither label grants merge rights; new edits or invalidated evidence remove `MERGE_READY`.
 Public records use concise headings and one authoritative set of Markdown fields and
 nested lists, strictly parsed by tools. No JSON fences or hidden metadata duplicates are
@@ -175,3 +178,10 @@ list without executing an unreviewed installer. Tests, CI, `.git` and local main
 instructions remain in the authoring repository, outside copied release packages.
 A copy records a source commit only when all packaged bytes match that repository's
 HEAD; unpublished edits are not mislabeled as the committed release.
+
+### Intake coordination
+
+A user-designated moderator can triage report batches using the repository's MODERATOR.md
+and the [intake guidance](references/worker-coordination.md#intake-moderators). It reuses
+related issues, records scoped additions/evidence and keeps held drafts in chat. Product
+implementation ownership and merge/closure authority remain separate.

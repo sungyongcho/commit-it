@@ -209,21 +209,28 @@ Missing or inconsistent records block a readiness claim.
    `REVIEW_READY`, synchronize authoritative state, mirrors, labels and PR Ready status.
    Verify all updates before claiming readiness. The ordinary implementing worker is done;
    do not automatically review its own or other workers' code or post an approval heading.
-4. **Requested review:** the implementing worker records its exact scope and requests review
-   in a different conversation/task under [review eligibility](pr-review.md#request-and-eligibility).
-   Record both task IDs, actual workers and head/base evidence. A worker cannot authorize
+4. **Requested review:** after completed REVIEW_READY delivery, the user may open a different
+   task and request the named PR's review, or the implementing worker may record a request
+   under [review eligibility](pr-review.md#request-and-eligibility). The reviewer may register
+   an explicit user-origin request directly, preserving user authorization evidence, original
+   worker/task provenance, both task IDs, scope and head/base; no implementer round trip is needed. A worker cannot authorize
    its own self-review; only an explicit user-approved exception permits `Self-review: LGTM`.
    The separate reviewer repairs clear in-scope defects on the same PR by default. Follow
-   the [repair protocol](pr-review.md#review-and-repair) with paused original writer,
-   declared files, expected head/base and Draft/`OCCUPIED`. Record reviewer-as-contributor
+   the [repair protocol](pr-review.md#review-and-repair) with declared files, expected head/base
+   and Draft/`OCCUPIED`. Ready/paused scopes need no predecessor acknowledgement; actual
+   overlapping writers block repair. The explicit user request covers bounded task messages,
+   OPS coordination, repairs, checks, commits/pushes and guarded rebase/expected-SHA lease
+   publication through MERGE_READY. Record reviewer-as-contributor
    without replacing original provenance. Eligible separate reviews use `Review: LGTM`
    with correction disclosure; an explicitly granted resolver may use
    `Conflict resolution: LGTM` under its additional gates.
 5. **Merge ready:** add `MERGE_READY` alongside `REVIEW_READY` only with a valid eligible
-   review and current passing checks for the matching head/base. Re-read all records and
-   labels; partial synchronization is not readiness. Remove `MERGE_READY` on new edits,
-   changed head/base, failed required checks or invalid review. Return to Draft/`OCCUPIED`
-   before further implementation. Neither readiness label grants merge authority.
+   review and current passing checks for the matching head/base after the requested review's
+   [rebase/publication procedure](pr-review.md#review-rebase-and-publication). Re-read records
+   and labels; partial synchronization is not readiness. At foreground checkpoints, invalidate
+   MERGE_READY on base/head drift and return to Draft/OCCUPIED, then rebase/reverify the affected
+   scope before restoring it. Failed checks or invalid review also invalidate readiness.
+   No scheduler is implied. Neither readiness label grants merge authority.
 6. **Finish:** only after an authorized maintainer or resolver merge, reconcile actual
    merge/issue receipts under that authority. Partial delivery leaves scope open. Named
    commit-error/conflict resolvers may close assigned PRs or edit assigned issues only if
@@ -263,3 +270,32 @@ references: [Codex App Server](https://learn.chatgpt.com/docs/app-server),
 [Codex CLI commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli),
 [Claude Code sessions](https://code.claude.com/docs/en/sessions), and
 [Claude Code Desktop](https://code.claude.com/docs/en/desktop#work-across-sessions).
+
+## Intake moderators
+
+A user-designated moderator owns intake and coordination, not product implementation.
+Use the repository's MODERATOR.md for project-specific routes and evidence locations.
+
+- Reuse the round's related issue/ownership snapshot, then recheck affected owner/head/body
+  before writes. Avoid scanning every PR or repeating unchanged dispositions.
+- Classify each report as duplicate, additive, new or held. Add only new evidence to a
+  duplicate; reconcile additive scope through the authorized issue note/body workflow.
+  A demonstrated regression after a completed fix needs a linked active record, not an
+  automatic reopen. Preserve acceptance intent and valid verification when criteria change.
+- Size by independently verifiable outcomes and shared contracts. A small actionable issue
+  can stay small; research or a check count alone does not justify splitting. Preserve a
+  user-declared single-worker epic. Held drafts stay in the chat/handoff summary and are
+  revisited next round; never create automatic persistent-memory copies.
+- Notify a product owner through its linked issue and the round summary. Ready work normally
+  receives a linked follow-up for added scope unless the user directs a scope change.
+  Do not claim its assignment or bypass a non-owner PR-write restriction. An evidence or
+  policy PR actually owned by the moderator follows ordinary owned delivery records.
+- Prefer existing durable evidence; check privacy, preserve originals and distinguish
+  historical captures from reproductions. Publish only under the relevant authority, then
+  link the immutable artifact. The role itself grants no merge, close or checkout rights.
+- Batch scoped records, serialize writes and use bounded tool-guided backoff. Missing
+  capabilities or runtime refusals never authorize another account/tool bypass.
+
+Report one compact table per batch: report, disposition, destination, next action.
+Anything the implementation owner must act on belongs in the authorized GitHub record;
+chat carries decisions and held drafts, not a competing repository backlog.
