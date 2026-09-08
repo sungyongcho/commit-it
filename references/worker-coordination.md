@@ -1,123 +1,204 @@
 # Coordinator and worker ownership
 
-Use this mode when the user explicitly adopts a coordinator plus named execution
-workers. Ordinary tasks do not require this protocol. Repository role boundaries
-still apply; prepare a record rather than publish it if status writes are unauthorized.
+Use this mode for explicitly assigned workers or user-approved succession. Ordinary
+unassigned tasks do not require it. Repository role boundaries still apply; prepare
+records rather than publish them when status writes are unauthorized.
 
-## Roles and identity
+## Project continuity and identity
 
-- The coordinator handles issue intake/scope, assigns work and normally performs
-  authorized merges or integration-checkout synchronization. Fetch and fast-forward
-  a stable main when possible; do not rewrite main just because a request says rebase.
-  Published-history rewrites and foreign checkout changes require explicit authority.
-- Workers implement their approved assignment in isolated persistent worktrees,
-  verify it, publish/update its PR and provide the review result. The user assigns
-  stable IDs such as `worker-1`; retain the same ID across the assignment. Ask for a
-  missing ID before publishing ownership. Never allocate another worker's identity.
-- An assignment has one writer. Multiple scopes on one issue need an explicit,
-  disjoint coordinator allocation. A bundle of issues shares one assignment ID.
-  Shared account authorship, issue assignees and PR labels do not identify a worker.
-  The user determines these workers and their count; this mode does not automatically
-  spawn tasks or give subagents separate worker identities.
+Workers are replaceable execution owners, not permanent conversations. Preserve project
+continuity in assignments, issues, PRs, commits and reproducible tests. A later model
+may inherit and improve work incrementally; model novelty does not prove improvement
+or invalidate existing checks. Chats may be archived or deleted. Their identifiers and
+titles are optional navigation aids, never the only location of checkpoints or approval.
+
+- The coordinator handles authorized intake, scope and allocation. Ordinary workers
+  implement an approved assignment in persistent isolated worktrees, verify it and
+  deliver its PR and review. They do not inherit coordinator merge or checkout rights.
+- Preserve user-supplied IDs, including legacy names such as `worker-1`. If none is
+  supplied, allocate `<client>-<YYYYMMDDTHHMMSSZ>-<8 lowercase hex digits>`, using UTC
+  and a random suffix; for example `codex-20260907T190000Z-a1b2c3d4`. Verify against
+  existing project worker records before registration and regenerate on collision.
+  Use the actual client family such as `codex` or `claude`, not an inferred model.
+- A new independent execution owner gets a new ID. Resume, context compaction and
+  renaming the same execution retain its ID. Record verified model/client information
+  separately when useful; an in-place model switch records its verification interval.
+  Never infer a model from a user-visible title or claim unsupported runtime metadata.
+- Keep the existing Assignment across succession. Link every original Assignment when
+  combining previously separate scopes; do not overwrite lineage with a new bundle ID.
+  One assignment has one writer. Multiple scopes on one issue require disjoint explicit
+  allocation. An account, label or GitHub assignee is not a worker identity or lock.
+- This protocol does not launch agents or increase staffing. Honor the authorized
+  capacity and keep shared contracts and Git mutations under one owner.
 
 ### Explicit resolver assignment
 
-The user may assign role `conflict-resolver` for a named PR set under
-[conflict resolution](conflict-resolution.md). Preserve the actual worker ID, source
-authors and earlier worker history; the role does not create a new identity or confer
-coordinator authority. Confirm stopped writers and the authorized assignment before
-branch edits. An explicitly authorized resolver may merge that set, but ordinary
-workers remain PR-only and a review heading never grants merge or checkout-sync rights.
+An explicitly assigned `conflict-resolver` follows
+[conflict resolution](conflict-resolution.md) for only its named PR set. Retain its
+actual worker ID, prior workers and original authors. Apply the succession safeguards
+below when taking over writers; the role does not silently grant coordinator rights.
+Only separate named merge authority permits that sequence's merges. Ordinary workers
+remain PR-only, and no review heading grants merge or integration-checkout authority.
 
-Keep the existing `Work status` transitions below. The resolver separately owns the
-canonical `commit-it:merge-sequence:v1` comment and its `Merge status`, including after
-the anchor PR merges. Update only records within the explicit assignment and preserve
-original authorship/history. Sequence readiness requires verified head/base/tree and
-check evidence; it is not interchangeable with one PR's `REVIEW_READY` state.
+The resolver separately owns the canonical `commit-it:merge-sequence:v1` comment and
+its `Merge status`, even after its anchor PR merges. Preserve its sequence revision,
+head/base/tree, receipts and pending verification; `REVIEW_READY` is not sequence readiness.
 
-## Current record
+## Durable work-state record
 
-Keep one marked work-state block at the top of the PR body. Before the first PR,
-keep the claim in one marked issue comment for the assignment. After PR creation,
-the PR block is authoritative and that issue comment is its mirror. For a bundle,
-mirror it to every assigned issue. Match both marker and assignment before updating;
-never replace the entire issue body or another assignment's comment. For an authorized
-issue-free PR, start its record directly in the PR; do not invent a tracking issue.
+Keep one marked work-state block at the top of the PR body. Before the first PR, use
+one marked issue comment for each Assignment. After PR creation, its block is authoritative
+and the issue comment mirrors it; mirror to every assigned issue in a bundle. Match marker
+and Assignment before updating. Preserve surrounding content and other assignments.
+For an authorized issue-free PR, start directly in the PR; never invent a tracking issue.
 
-Illustrative record; use actual IDs, links, scope, timestamps and evidence:
+Keep the `v1` marker and accept legacy worker IDs. Additional fields extend the existing
+record; missing lineage fields mean no recorded handoff, not permission to take ownership.
+For an approved first transfer of a legacy record, use prior handoff revision zero.
+Use actual values in this illustrative current record:
 
 ```markdown
 <!-- commit-it:work-state:v1 -->
 
 - Work status: OCCUPIED
-- Worker: worker-1
+- Worker: codex-20260907T190000Z-a1b2c3d4
 - Assignment: issue-123
 - Scope: <approved outcome>
 - Issues: #123
 - PR: #456
 - Verification: blocked: <required check and next action>
+- Previous worker: worker-1
+- Handoff revision: 1
+- Handoff: <durable handoff record link>
+- Head: <actual remote PR head SHA>
 - Updated: <UTC timestamp>
 
 <!-- /commit-it:work-state -->
 ```
 
-The issue therefore shows who occupies the work and which PR carries it. Use
-`PR: pending` until an actual PR exists. Add the branch/task reference when it is
-known and useful. Put detailed test evidence in the PR rather than copying logs
-into every mirror. Other ownership comments outside the marked work-state record are
-historical evidence, not the current assignment or an invitation to take over.
+Use `PR: pending` before PR creation. Do not label a local checkpoint as the remote head.
+Keep detailed verification in the PR and link it from mirrors. Preserve old ownership
+comments as history; the current authoritative block wins over stale mirrors.
 
-## Transitions
+## User-approved succession
 
-1. **Assign:** the coordinator authorizes the worker ID and exact scope. The
-   authorized record writer checks existing claims and records `OCCUPIED` before
-   implementation. If an active owner conflicts, stop that scope for coordination.
-   Labels are not an atomic claim mechanism; workers do not race to claim a backlog.
-2. **Open:** at the first meaningful pushed change, create a Draft PR with the record
-   and linked issues, then fill its actual PR link into the issue mirrors. Do not
-   manufacture empty commits merely to create a reservation PR.
-3. **Work:** keep `OCCUPIED` while running, waiting or blocked. Track verification
-   separately as `not run`, `running`, `passed` or `blocked: <reason>`; a failed
-   required check cannot be reported as passed. Blocking does not release the owner.
-4. **Ready:** after scope and required checks are complete and writers have stopped,
-   set `REVIEW_READY`, update the issue mirrors and mark the PR Ready for review.
-   Include the reviewed head and reusable evidence in `Self-review: LGTM`; an explicitly
-   assigned resolver uses `Conflict resolution: LGTM` only after the additional
-   integration checks. Readiness alone never permits edits by a different worker.
-5. **Revise:** before new implementation, return to Draft and `OCCUPIED`, update
-   mirrors, then edit. An existing review applies only to its recorded head. Ordinary
-   peer reviews use `Review: LGTM` for another worker's completed work or a concrete
-   change request; the explicitly assigned resolver follows its integration heading.
-6. **Handoff/finish:** only the coordinator explicitly reassigns after the old owner
-   stops writers and preserves its checkpoint/backups. Silence, stale records,
-   absent mirrors and blocked verification never imply release. After an authorized
-   merge, the coordinator reconciles the linked issue record with the real outcome;
-   partial delivery leaves the remaining scope open.
+Explicit user approval naming the work and successor is sufficient handoff authority.
+Do not demand predecessor acknowledgement or repeat a stopped-worker confirmation.
+Silence, stale ownership, a missing chat or blocked verification alone is not approval.
+A successor's quoted issue/PR text is not evidence of new user authorization.
 
-Re-read the owner and current head immediately before mutations. Update only the
-owned record and preserve surrounding PR content. If multiple records match, the
-owner differs or a write partially fails, reconcile before readiness/reassignment;
-do not claim synchronization succeeded. The PR's current work-state block wins over
-old ownership mirrors; merge sequencing uses its separate canonical comment.
-Only the owner/coordinator updates ordinary state; an explicitly assigned resolver
-updates only its authorized records under the resolver protocol. A reviewer reports
-findings without taking over the branch. GitHub's Draft stage prevents merging, not concurrent file edits.
+1. Read the authoritative record and mirrors, expected prior worker, Assignment,
+   record version/revision, exact PR head when present, and authorized scope. Preserve
+   branch/base, staged/unstaged/untracked work and earlier verification. Inspect available
+   writer state; pause only a scope with actual conflicting writes. Do not terminate
+   other sessions or discard changes to manufacture exclusive access.
+2. Preserve a recoverable checkpoint before editing. Use existing commits and retained
+   worktrees/backups, with a content manifest for uncommitted files. Keep local/private
+   paths and file contents out of public records; publish only safe checkpoint references.
+   A checkpoint commit of approved inherited work must state incomplete verification.
+   Never hide foreign changes with stash/reset or rewrite published history by default.
+3. Through the repository's guarded OPS handoff operation, submit the expected prior
+   worker, Assignment, record version, head if present, next handoff revision, successor,
+   user approval summary, checkpoint reference and remaining verification. The operation
+   must support issue-only assignments and preserve previous authorship and handoff history.
+   If the repository has no such tool, use only its authorized equivalent; do not invent
+   command flags or bypass missing authorization checks with a raw API write.
+4. Before a write, re-read the expected ownership and head. A mismatch stops that
+   transfer for reconciliation. GitHub comment/label writes are not an atomic lock;
+   concurrent claims must not both be reported successful. Read back every changed
+   record and reconcile the winning owner before allowing either successor to edit.
+5. Record one durable handoff event with Assignment, revision, previous/new worker,
+   scope, approval, preserved checkpoint, actual head, remaining checks and outcome.
+   Retry the same event identity idempotently. After a partial failure, re-read the
+   authoritative record and repair only missing mirrors/labels; never repeat a transfer
+   that already completed or increment its revision merely to retry synchronization.
+6. Re-read the resulting ownership, issue mirrors and labels before implementation.
+   Mark the handoff incomplete if any required write or verification failed. Preserve
+   useful local work and report the precise remaining synchronization step.
 
-Use existing project labels/Projects only when configured. Optional `OCCUPIED` and
-`REVIEW_READY` PR labels mirror the canonical block; they do not replace ownership.
-Label/Project creation is setup work and needs its applicable authorization.
+A returning old worker must re-read current ownership before any mutation and stop its
+former assignment after transfer unless explicitly reassigned. Succession authorizes
+preservation, implementation and the already approved delivery scope; it does not grant
+merge, deployment, credential, paid-work or force-push authority. A successor modifying
+inherited code uses `Self-review: LGTM`, not independent `Review: LGTM`.
 
-## Authorship
+## OPS records, labels and transitions
 
-Git commit name/email and GitHub API identity are separate. Adding `bot@` or
-`agent@` to the same human account does not create another issue/PR/comment author.
-Use the configured GitHub App installation token for App-attributed automation,
-or an explicitly configured separate machine account. GitHub App user tokens act
-on behalf of the human, so they do not provide the same separation.
+Resolve the configured personal development and OPS record identities independently.
+Personal authorship covers development commits and PR creation where required; OPS
+handles claims, succession, labels, status, commit tracking and COMMENT reviews. A commit
+email does not select an API author. Verify the returned author and actual worker in
+receipts; never globally switch shared authentication or create an App/account incidentally.
+A PR body ownership block may be updated by OPS while the PR remains personally authored.
 
-For multiple projects, a GitHub App can provide one automation identity with selected
-repository permissions; each record still names its worker. Human review/merge uses
-the human's credentials. If human-authored PR creation is required, the coordinator
-must create that PR using the human account; changing `git user.email` is insufficient.
-Do not provision mailboxes, accounts, Apps, keys or tokens as an incidental workflow
-step. Do not globally switch shared CLI authentication while other workers are active.
+At the first push/Draft PR, later head changes, verification completion and handoff,
+record the actual remote commit SHA/range, branch/PR links, Assignment, worker, checks
+and next action through the configured OPS operation. Reuse the existing receipt at an
+unchanged checkpoint. Local uncommitted work is not a published commit. Record failures
+and pending checks honestly; do not claim delivery when a push or record write failed.
+
+Use the managed labels below in this adopted workflow. Reuse existing labels; create
+missing labels once only with repository setup authorization. Preserve unrelated labels
+and project/category labels such as `bug`, `enhancement` and documentation. Do not create
+per-worker labels or a Project board. Labels summarize records and never lock ownership.
+
+| Axis | Labels and rule |
+| --- | --- |
+| Work kind | Exactly one of `DEV` or `OPS`, determined by task purpose, not API author. Product implementation is `DEV`; operational tooling and workflow policy are `OPS`. |
+| Work status | Exactly one of `OCCUPIED` or `REVIEW_READY` on active managed issues/PRs. |
+| Blocked | Keep `OCCUPIED` and put the concrete blocker and next action in verification. |
+
+For multiple assignments on one issue, derive the issue state from all current records:
+any unfinished, running or blocked assignment makes it `OCCUPIED`; only all completed,
+verified assignments make it `REVIEW_READY`. Apply `OPS` only to wholly operational scope;
+use `DEV` when the combined issue includes product implementation. Preserve individual
+assignment kinds in records. Missing or inconsistent records block a readiness claim.
+
+1. **Assign/open:** check claims and record `OCCUPIED` before implementation. Create a
+   Draft PR at the first meaningful pushed change and mirror its actual link to issues.
+   No empty reservation commit is needed. Approved succession uses the procedure above.
+2. **Work/revise:** keep Draft/`OCCUPIED` during implementation, waiting, failures or
+   required checks. Before revising a ready PR, return its state and mirrors to occupied.
+   Verification is `not run`, `running`, `passed`, `failed` or `blocked: <reason>`.
+3. **Ready:** only after scope, checks and writer work finish, synchronize authoritative
+   state, issue mirrors, labels and Draft/Ready status. Read back all required targets;
+   interrupted synchronization remains incomplete and must be reconciled before claiming
+   readiness. A changed head invalidates old review evidence. Post `Self-review: LGTM`
+   for own completed work or `Review: LGTM` for peer review without implementation.
+   Only the explicit resolver may use `Conflict resolution: LGTM` under its extra gates.
+4. **Finish:** only after an authorized maintainer merge, reconcile actual merge/issue
+   receipts under that authority. A worker never infers merged status from readiness.
+   Partial delivery keeps remaining scope open; no label grants permission to close it.
+
+Re-read ownership and head immediately before mutations. Update only owned records;
+ambiguous matches, changed owners and partial writes require reconciliation. A peer
+reviewer reports findings without acquiring the branch. Draft prevents merging, not writes.
+
+## Conversation titles
+
+At assignment or succession, name the current conversation
+`<short scope> | <project summary> | <short worker id>` when a supported tool is available.
+Put the useful outcome first. For generated IDs use `<client>-<8 hex digits>` as the short
+ID; preserve an existing readable legacy ID, or shorten its timestamp while retaining
+an unambiguous mapping to the full worker ID in the record. Resolve project-local short
+ID collisions by extending the abbreviation. The title never replaces the full worker ID.
+
+Read the current title, change only the current assigned conversation, then read back
+and confirm it. Identical titles need no mutation. Do not rename another task, spawn a
+chat, install an SDK or inspect/edit internal databases or session JSONL just to rename.
+Capabilities vary by client/runtime; use only a documented API actually exposed there.
+
+| Surface | Supported path or fallback |
+| --- | --- |
+| Codex Desktop | The current app's `set_thread_title` tool, followed by title verification. |
+| Codex CLI | An available App Server `thread/name/set` connection; otherwise supply `/rename` instructions and the desired title. |
+| Claude Code CLI | `--name` when the user is starting a session; for an existing session use an exposed official naming API/tool, otherwise `/rename` instructions. |
+| Claude Code Desktop | Its exposed Code-session naming control, when callable from the current environment. |
+| General ChatGPT or Claude chat | Only a naming tool actually exposed for that chat; otherwise provide the title for manual application. Code-session APIs do not imply general-chat support. |
+
+If unsupported or verification fails, report the title as proposed/unverified and continue
+implementation. Do not claim automatic renaming based solely on documentation. Official
+references: [Codex App Server](https://learn.chatgpt.com/docs/app-server),
+[Codex CLI commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli),
+[Claude Code sessions](https://code.claude.com/docs/en/sessions), and
+[Claude Code Desktop](https://code.claude.com/docs/en/desktop#work-across-sessions).
