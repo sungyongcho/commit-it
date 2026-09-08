@@ -10,7 +10,7 @@ the next version only after scope and verification are known: compatible fixes u
 patch, additive behavior uses minor, and incompatible documented interfaces use major.
 Follow [Semantic Versioning](https://semver.org/). When the user has authorized autonomous
 version maintenance, make this decision and update metadata, release notes and verified
-consumer pins without asking again. A version-only bump without a meaningful change is
+package metadata without asking again. A version-only bump without a meaningful change is
 unnecessary. This authorization does not itself publish a tag or GitHub Release.
 
 Commit subjects follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -18,13 +18,12 @@ and repository templates. Ordinary changes describe shipped behavior; a dedicate
 preparation commit may use `chore(release): prepare vX.Y.Z`. Commits do not automatically
 create releases. Preserve required issue references and actual evidence.
 
-Run package and installer tests, shell syntax checks and `scripts/check_release.py`.
+Run package and native-installation boundary tests, shell syntax checks and `scripts/check_release.py`.
 For an explicitly authorized release, move the selected notes from Unreleased to a
 dated version section and run `scripts/check_release.py --tag vX.Y.Z` with its actual
 tag name. This validates agreement without creating a tag. Never rewrite published
 tags or infer publication authority from passing checks.
 
-Shared development source may contain unpublished work. Consumer snapshots should
-record exact source commits and hashes. Recovery pins cannot overwrite newer live
-source. Verify public installation links before publishing promotional material that
-promises the commands are available.
+Git source may contain unpublished work. Native product installations are maintained
+separately and must not overwrite source changes. Verify current product installation
+guidance before publishing material that promises an installation command is available.

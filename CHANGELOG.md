@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep the skill focused on portable Git delivery and requested review procedures;
+  delegate project record schemas, role policy and source management to their owners.
+- Retire the shared installation/linking helper. Use product-native installation
+  independently of source publication; preserve existing installations and history.
+
 ## 4.0.0 - 2026-09-07
 
 - Make concise canonical Markdown fields/nested lists the public OPS record format;
