@@ -34,9 +34,11 @@ publication remain separately authorized; see docs/releasing.md.
   of the scoped delivery sequence. Still render concrete paths, messages and evidence
   before execution. Reassess material scope changes or foreign work; do not repeatedly
   ask for approval already granted for the same actions.
-- Never amend, reset, stash, rebase, force-push, or expose secrets unless separately and
-  explicitly authorized. Approval of the rendered preview authorizes its exact ordinary
-  push as part of the commit workflow.
+- Never amend, reset, stash, rebase, force-push, or expose secrets without explicit authority.
+  A scoped delivery preview covers its ordinary push. An explicit user review request in a
+  separate task covers the bounded rebase/expected-SHA lease exception in
+  [PR review guidance](references/pr-review.md#review-rebase-and-publication), not blanket force.
+  Repository and higher-priority runtime/tool approval policies still apply.
 
 ## GitHub Tracking for Humans and Agents
 
@@ -372,7 +374,10 @@ would happen. State both resolved settings in the preview. Contradictory explici
 for the same setting require one focused clarification. If the requested method is
 unavailable or conflicts with a protection, report that constraint rather than silently
 choosing another method or modifying repository settings. Rebase is not an automatic
-fallback and remains subject to separate explicit authorization.
+fallback and requires explicit authority. The branch rebase covered by an
+[explicit user review request](references/pr-review.md#review-rebase-and-publication)
+already has that scoped authority; do not request it again. That exception does not
+authorize a merge or changing the requested merge method.
 
 Default squash is a proposed merge method, not authorization to merge. Keep the existing
 preview, approval, issue-creation, PR-publication, and branch-deletion boundaries. Do not
@@ -385,13 +390,14 @@ perform or publish an ordinary code review by default, at delivery checkpoints, 
 because a repository enables tracking. Read [PR review guidance](references/pr-review.md)
 only for an eligible request or an explicit user-approved exception.
 
-- Ordinary review requires the implementing worker's durable request and takes place
-  in a different conversation/task, strictly within that implementation scope. Record the
-  requesting worker, implementation task, reviewer task, PR, head/base and outcome. The
-  requested separate reviewer directly repairs clear defects within that implementation
-  scope on the same PR by default, then verifies and publishes the final result. A changed
-  worker name in the same conversation does not satisfy task separation. Do not
-  spawn a new task without the runtime's required user authority; record a pending request.
+- Ordinary review requires a durable user-origin or implementing-worker request in a
+  different conversation/task. REVIEW_READY completes implementation; the user can open a
+  separate task and request the named PR's review. That explicit request authorizes autonomous
+  in-scope review, repair, verification, personal commits, ordinary push, guarded rebase/lease
+  publication and user-visible task/OPS coordination through MERGE_READY, without repeated
+  permission. The reviewer can register the user-origin request directly while preserving
+  original worker/task provenance, scope and head/base. A changed worker name alone does not
+  satisfy task separation. Do not create a new task without the runtime's required authority.
 - Self-review is prohibited for ordinary workers unless the user explicitly approves it
   for the named scope. An implementing worker cannot approve its own exception. This
   exception does not claim independent authorship or human review. An implementation
@@ -399,10 +405,11 @@ only for an eligible request or an explicit user-approved exception.
   is instead disclosed as reviewer-as-contributor under the repair protocol; it cannot
   claim independent review of its own corrections.
 - Reuse implementation/test evidence and inspect only the requested diff and direct
-  contracts/callers. Before repair, pause the original writer, declare files/scope and
-  expected head/base, remove `MERGE_READY`, and use Draft/`OCCUPIED`. Commit and ordinarily
-  push scoped fixes personally to the same PR; OPS records the contribution and final
-  head. Leave change requests/questions only for complex intent, material scope changes,
+  contracts/callers. Before repair, declare files/scope and expected head/base, remove
+  `MERGE_READY`, and use Draft/`OCCUPIED`. Verified ready/paused scopes need no predecessor
+  acknowledgement; actual overlapping writers block the repair. Coordinate only this PR's
+  work through authorized task messages and OPS records. Commit/publish scoped fixes personally
+  to the same PR; OPS records the contribution and final head. Leave change requests/questions only for complex intent, material scope changes,
   unresolved authority or ambiguity. No unrelated review or wider audit is implied. Verification
   and final diff/scope checks remain part of implementation; they are not a PR approval.
 - Authorized successful reviews start exactly with `Review: LGTM` for a separate reviewer,
@@ -412,8 +419,9 @@ only for an eligible request or an explicit user-approved exception.
   Preserve historical headings; use a concrete `Changes requested` outcome for blockers.
 - A valid review plus current passing checks and matching PR head/base permits adding
   `MERGE_READY` alongside `REVIEW_READY`; it does not replace the work status. Reconcile
-  the record and labels before reporting readiness. Remove `MERGE_READY` when edits,
-  head/base changes, a required check failure or an invalid review invalidate its evidence.
+  the record and labels before reporting readiness. Rebase onto the current base before final
+  review readiness. At a foreground checkpoint, changed base/head invalidates MERGE_READY:
+  reconcile, rebase and renew affected evidence before restoring it. No scheduler is implied.
 - Publish through the configured OPS identity where required and use COMMENT when formal
   self-approval is unavailable. No heading or either ready label grants merge, issue-edit,
   deployment or local-main authority. Do not repeat an unchanged review.
@@ -561,9 +569,11 @@ branch.
   matching local branch destination can be established; otherwise treat it as a blocker.
 - Fetch the previewed destination before execution and stop if the remote changed in a
   way that makes the push non-fast-forward or invalidates the preview.
-- Use an ordinary push only. Never force-push, use `--force-with-lease`, rewrite remote
-  history, bypass branch protection, or change remote configuration.
-- Treat detached HEAD, ambiguous or missing remotes, non-fast-forward history, failed
+- Use an ordinary push by default. Only the explicit user-requested review exception in
+  [PR review guidance](references/pr-review.md#review-rebase-and-publication) permits a
+  rebase publication with an exact branch and expected remote SHA in `--force-with-lease`.
+  Never use plain force, rewrite other remote history, bypass protection or change remotes.
+- Treat detached HEAD, ambiguous or missing remotes, unexpected non-fast-forward history, failed
   hooks or verification, secret detection, authentication failure, protected-branch
   rejection, and newly discovered foreign work as blockers.
 - After pushing, verify the remote-tracking ref contains the final local commit and

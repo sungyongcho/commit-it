@@ -1,16 +1,26 @@
 # Focused Pull Request Reviews
 
-Ordinary worker reviews are off by default. The implementing worker must request a
-review of its exact implementation scope, and a different conversation/task performs it.
-A delivery checkpoint, ready label or repository tracking opt-in is not a request.
-The requested separate reviewer fixes clear defects within that scope on the same PR
-by default, then verifies the final head and records readiness. Do not review unrelated
-work, start a monitor or invent new implementation scope.
+Ordinary worker reviews are off by default. REVIEW_READY completes implementation.
+The user may open a separate task and explicitly request review of the named PR, or the
+implementing worker may record a review request. A ready label or tracking opt-in alone
+is not a request. The separate reviewer fixes clear defects within that implementation
+scope on the same PR, verifies the final head/base and records MERGE_READY. Do not review
+unrelated work, start a monitor or invent new implementation scope.
+
+An explicit user review request grants standing authority for that PR's in-scope review,
+repair, verification, personal commits, ordinary push, guarded rebase/expected-SHA lease
+publication and user-visible task/OPS coordination through MERGE_READY. Do not ask again
+for those routine actions. Repository and higher-priority runtime/tool approval policies
+still apply; this document cannot override a tool restriction or missing runtime permission.
+It grants no implicit merge, issue-scope edit, user-main update, credentials or deployment rights.
 
 ## Request and eligibility
 
-- Preserve a durable request with implementing worker, Assignment, PR, implementation
-  task identifier, requested scope, exact head/base and existing verification evidence.
+- Preserve a durable request with its origin and authorization evidence, implementing worker,
+  Assignment, PR, implementation task identifier, scope, exact head/base and existing checks.
+  For an explicit user request, the reviewer may register the user-origin request itself;
+  no additional implementing-worker request is needed. Keep the request's user origin separate
+  from original implementation provenance; never claim the reviewer was the original worker.
   The reviewer records a different task identifier and its actual worker ID. A new model
   or ID in the same task is not a separate review. If task identity cannot be established,
   leave review pending instead of asserting separation. Missing chat history does not
@@ -35,15 +45,24 @@ work, start a monitor or invent new implementation scope.
    direct contracts/callers; no unrelated audit is authorized.
 2. Correct clear, reproducible implementation-scope defects directly. Before any edit,
    declare the bounded repair scope/files and expected head/base in the OPS record,
-   ensure the original writer is paused, preserve its changes and use the same PR branch.
-   Set Draft/`OCCUPIED` and remove `MERGE_READY`. Re-read the claim and head/base immediately
-   before writing; actual concurrent writes or changed expectations stop that repair.
+   preserve changes and use the same PR branch. A verified ready/paused scope needs no
+   predecessor acknowledgement or another user confirmation. Use the authorized user-visible
+   task messages and OPS records to coordinate pause/resume within this reviewed PR; actual
+   overlapping writers block repair. Set Draft/`OCCUPIED` and remove `MERGE_READY`. Re-read
+   the claim and head/base immediately before writing; reconcile drift before continuing.
+   If the runtime rejects only an optional notification message, report it as unsent and
+   continue only when exclusive write ownership and every required OPS record are already
+   verified. If it rejects required coordination or a required record, stop the affected
+   stage. Never bypass a rejection or retry the rejected action indirectly through another
+   tool/account/channel; higher-priority runtime restrictions remain binding.
 3. Make the smallest coherent fix and meaningful regression test. Personal identity
    authors/commits/pushes the repair to the same PR; OPS records original author/request,
    reviewer-as-contributor, claimed files, repair commits and resulting head. Preserve
-   authorship/history. Do not force-push, create a replacement PR, merge, edit issue scope
-   or acquire unrelated ownership merely because review was requested.
-4. Reuse valid prior tests; rerun affected checks after corrections and verify the final
+   authorship/provenance and a recoverable checkpoint. Apply only the guarded rebase/lease
+   exception below; do not create a replacement PR, merge, edit issue scope or acquire
+   unrelated ownership merely because review was requested.
+4. Rebase the reviewed branch onto its current base before final readiness under the protocol
+   below. Reuse valid prior tests; rerun affected checks after corrections and verify the final
    PR head/base and accepted implementation scope. Pending CI remains pending. Record
    the actual repair range and state explicitly that the reviewer contributed corrections
    and is not an independent reviewer of those corrections. This remains `Review: LGTM`
@@ -79,7 +98,7 @@ Successful reviews use one exact first line, according to the actual assignment:
 | Approval heading | Applicable work |
 | --- | --- |
 | `Self-review: LGTM` | Own or inherited implementation only under explicit user-approved self-review for this scope. |
-| `Review: LGTM` | Implementing-worker-requested review in a different task, including bounded same-PR repairs with reviewer-as-contributor disclosure. |
+| `Review: LGTM` | User-origin or implementing-worker-requested review in a different task, including bounded same-PR repairs with reviewer-as-contributor disclosure. |
 | `Conflict resolution: LGTM` | Verified integration by the explicitly assigned `conflict-resolver` with review authority for the named PR set. |
 
 These are the only approval headings; never use bare `OK`, bare `LGTM`, or another
@@ -102,6 +121,32 @@ reviews as history rather than rewriting their labels or claiming they cover new
 Neither ready label nor any review heading grants merge, issue-edit or deployment rights.
 An explicit resolver preserves original authors and follows the extra tree/sequence gates
 in [conflict resolution](conflict-resolution.md); ordinary reviews do not activate them.
+
+## Review rebase and publication
+
+For an explicit user review request, complete this procedure within the named PR's isolated
+owned worktree. An implementing-worker request alone does not invent history-rewrite authority;
+use existing explicit or repository standing permission for that operation.
+
+1. Fetch the target base and reviewed branch, record their full SHAs, inspect divergence and
+   current write ownership, and preserve a recoverable pre-rebase checkpoint. Rebase onto the
+   current target base before final MERGE_READY; if already current, no rewrite is needed.
+   Preserve original commit authors, repair contribution and scope. Do not absorb foreign work.
+2. Run affected verification and inspect the resulting review delta. Keep old/new head and base
+   evidence in OPS; historical review receipts retain their original SHAs and meaning.
+3. Prefer ordinary push. For the necessary rebase of the published reviewed branch, the explicit
+   user review request authorizes only
+   `--force-with-lease=refs/heads/<reviewed-branch>:<expected-remote-head-SHA>` to that exact branch.
+   The expected full SHA is captured before rebasing and rechecked immediately before publication.
+   A changed remote head, overlapping writer, failed lease or protection rejection blocks the
+   push: reconcile, never refresh the lease blindly to overwrite new work. Plain force, unpinned
+   leases, base-branch rewrites and protection bypass are forbidden. Verify the remote result.
+4. Recheck the current remote head and target base immediately before readiness. Publish an
+   eligible review and synchronize Ready/REVIEW_READY plus MERGE_READY only for that verified
+   final head/base. If the base advances after readiness at a foreground checkpoint,
+   invalidate MERGE_READY, return to Draft/OCCUPIED, then rebase/reverify the affected scope and
+   renew the records. Reuse unchanged evidence; do not rewrite historical reviews. This is
+   foreground continuation of the authorized task, not a background monitor or merge grant.
 
 ## Project-oriented reason codes
 

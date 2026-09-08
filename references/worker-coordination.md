@@ -209,21 +209,28 @@ Missing or inconsistent records block a readiness claim.
    `REVIEW_READY`, synchronize authoritative state, mirrors, labels and PR Ready status.
    Verify all updates before claiming readiness. The ordinary implementing worker is done;
    do not automatically review its own or other workers' code or post an approval heading.
-4. **Requested review:** the implementing worker records its exact scope and requests review
-   in a different conversation/task under [review eligibility](pr-review.md#request-and-eligibility).
-   Record both task IDs, actual workers and head/base evidence. A worker cannot authorize
+4. **Requested review:** after completed REVIEW_READY delivery, the user may open a different
+   task and request the named PR's review, or the implementing worker may record a request
+   under [review eligibility](pr-review.md#request-and-eligibility). The reviewer may register
+   an explicit user-origin request directly, preserving user authorization evidence, original
+   worker/task provenance, both task IDs, scope and head/base; no implementer round trip is needed. A worker cannot authorize
    its own self-review; only an explicit user-approved exception permits `Self-review: LGTM`.
    The separate reviewer repairs clear in-scope defects on the same PR by default. Follow
-   the [repair protocol](pr-review.md#review-and-repair) with paused original writer,
-   declared files, expected head/base and Draft/`OCCUPIED`. Record reviewer-as-contributor
+   the [repair protocol](pr-review.md#review-and-repair) with declared files, expected head/base
+   and Draft/`OCCUPIED`. Ready/paused scopes need no predecessor acknowledgement; actual
+   overlapping writers block repair. The explicit user request covers bounded task messages,
+   OPS coordination, repairs, checks, commits/pushes and guarded rebase/expected-SHA lease
+   publication through MERGE_READY. Record reviewer-as-contributor
    without replacing original provenance. Eligible separate reviews use `Review: LGTM`
    with correction disclosure; an explicitly granted resolver may use
    `Conflict resolution: LGTM` under its additional gates.
 5. **Merge ready:** add `MERGE_READY` alongside `REVIEW_READY` only with a valid eligible
-   review and current passing checks for the matching head/base. Re-read all records and
-   labels; partial synchronization is not readiness. Remove `MERGE_READY` on new edits,
-   changed head/base, failed required checks or invalid review. Return to Draft/`OCCUPIED`
-   before further implementation. Neither readiness label grants merge authority.
+   review and current passing checks for the matching head/base after the requested review's
+   [rebase/publication procedure](pr-review.md#review-rebase-and-publication). Re-read records
+   and labels; partial synchronization is not readiness. At foreground checkpoints, invalidate
+   MERGE_READY on base/head drift and return to Draft/OCCUPIED, then rebase/reverify the affected
+   scope before restoring it. Failed checks or invalid review also invalidate readiness.
+   No scheduler is implied. Neither readiness label grants merge authority.
 6. **Finish:** only after an authorized maintainer or resolver merge, reconcile actual
    merge/issue receipts under that authority. Partial delivery leaves scope open. Named
    commit-error/conflict resolvers may close assigned PRs or edit assigned issues only if
