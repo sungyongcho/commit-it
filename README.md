@@ -114,22 +114,30 @@ Read [worker coordination](references/worker-coordination.md) for named workers 
 [PR review](references/pr-review.md) for review work. Reload the real source when another
 conversation may have updated it; existing context is not rewritten by filesystem changes.
 
-### Worker succession in 3.0.0
+### Readable records and review repair in 4.0.0
 
 Workers are replaceable execution owners. Project assignments, commits, PRs and tested
 checkpoints preserve continuity when chats disappear or a later model takes over.
 Explicit user approval transfers named work without waiting for a predecessor response;
-existing IDs and v1 records remain valid. The changed transfer contract is the reason
-for the major version, not an incompatible storage migration.
+existing IDs and canonical Markdown record identities remain valid. Version 4 changes
+the public record format and reviewer repair contract: normal OPS record reads no longer
+fall back to legacy JSON. An explicitly authorized audited migration updates existing
+OPS-generated records in place, excluding human/unmanaged content and Git history.
 
 The coordination reference defines collision-checked IDs, assignment lineage, OPS
 ownership/commit receipts, and `DEV`/`OPS` plus `OCCUPIED`/`REVIEW_READY` label synchronization.
 Ordinary implementation ends at `REVIEW_READY`. Code review requires the implementing
 worker's request and a different task; ordinary self-review needs explicit user approval.
-A valid review and current head/base/checks add `MERGE_READY` alongside `REVIEW_READY`.
+The separate reviewer directly fixes clear in-scope defects on the same PR, pauses the
+original writer, and records its contribution. It does not claim independent review of
+its own corrections. A valid review of the final head plus current checks adds
+`MERGE_READY` alongside `REVIEW_READY`.
 Neither label grants merge rights; new edits or invalidated evidence remove `MERGE_READY`.
-Personal accounts still author development commits and create PRs when the repository
-separates those actions from OPS records. Labels do not grant ownership or merge authority.
+Public records use concise headings and one authoritative set of Markdown fields and
+nested lists, strictly parsed by tools. No JSON fences or hidden metadata duplicates are
+published. Human-readable summaries link detailed evidence instead of dumping payloads.
+Personal accounts still author development and reviewer repair commits and create PRs
+when the repository separates those actions from OPS records. Labels do not grant ownership or merge authority.
 
 Conversation names follow `<short scope> | <project summary> | <short worker id>`.
 Use supported official tools and verify the new title; otherwise provide the suggested
@@ -144,8 +152,9 @@ This repository is the canonical reusable package. Keep private routing, host po
 credentials and machine-specific settings outside it. Use one local source with links
 for authoring and reviewed commit pins for distributed recovery snapshots.
 
-Ordinary policy edits do not bump the release version. Track working changes by content
-hash and Git state. Resolve pending related changes before selecting a release number.
+With user authorization for autonomous version maintenance, select a patch, minor or
+major bump when verified changes warrant it. Do not bump per conversation. Track working
+changes by content hash and Git state; reconcile related changes and consumer pins.
 See [release policy](docs/releasing.md) and [unreleased changes](CHANGELOG.md).
 
 ```sh

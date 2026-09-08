@@ -54,11 +54,12 @@ this mode. User and repository authority still govern every action.
 
 ## Durable sequence record
 
-Keep one canonical, editable comment marked `commit-it:merge-sequence:v1` on a named
-anchor PR. Store its comment ID or URL in the participating PR records. Continue
-updating that same comment after the anchor PR merges: its body, old commit messages
-and status mirrors do not replace the canonical sequence. Reconcile duplicate records,
-missing write access or partially applied updates before advancing.
+Keep one canonical, editable OPS v2 merge-sequence record on a named anchor PR.
+Store its comment ID or URL in participating records. Continue updating that same record
+after the anchor merges. Preserve exact schema keys and IDs; old JSON bodies, commit
+messages and mirrors do not replace it. Reconcile duplicates, missing access or partial
+writes before advancing. Runtime readers accept the current strict Markdown format;
+legacy JSON is available only to the explicitly authorized audited migration.
 
 The existing `Work status` model remains `OCCUPIED` / `REVIEW_READY`. Record the separate
 `Merge status` here; do not substitute merge states for worker states or treat a PR's
@@ -74,42 +75,35 @@ it does not replace Work status or authorize the sequence.
 | `MERGED` | Every planned step has a verified real merge receipt and resulting tree. |
 | `BLOCKED` | An unresolved authorization, ownership, check, state or receipt mismatch prevents the next step. Preserve completed work and the exact resume action. |
 
-Illustrative record; resolve placeholders before publication. During preparation,
-name unavailable evidence explicitly rather than inventing SHAs or passing results.
+Use the configured OPS schema/renderer for the complete write payload. This is a
+non-executable excerpt showing canonical lowercase fields and nested lists, not a full
+copyable record. The renderer supplies the type-specific v2 marker, required repository,
+authorization, anchor, PR snapshot and receipt fields. Never guess missing fields or SHA values.
 
 ```markdown
-<!-- commit-it:merge-sequence:v1 -->
+### Merge sequence
 
-- Sequence: <stable sequence ID>
-- Revision: <revision>
-- Role: conflict-resolver
-- Resolver: <actual worker ID>
-- Merge status: PREPARING
-- Base: <base branch and full SHA>
-- Order: <ordered PR URLs>
-- Completed: <PR, merge SHA and resulting tree receipts, or none>
-- Next: <next unmerged PR URL, or none>
-- Readiness scope: next-step-only
-- Ready PR: <verified next PR URL, or none>
-- Pending verification: <later unverified PR URLs, or none>
-- Authorization: <verified grant, named PR set, allowed actions and merge method>
-- Resume: <next action or concrete blocker>
-- Updated: <UTC timestamp>
-
-| PR | Head | Expected base | Verified tree | Evidence |
-| --- | --- | --- | --- | --- |
-| <PR URL> | <full head SHA> | <base SHA or planned predecessor/tree> | <full expected result tree SHA> | <checks, inputs/environment and review references> |
-
-<!-- /commit-it:merge-sequence -->
+- schema_version: 2
+- id: <stable sequence ID>
+- role: conflict-resolver
+- resolver: <actual worker ID>
+- revision: 1
+- status: PREPARING
+- order:
+  - <first PR number>
+  - <next PR number>
+- prs: {}
 ```
 
-Every planned PR needs a head/base/tree/evidence row, with unavailable future evidence explicitly pending. `MERGE_SEQUENCE_READY` applies only to `Ready PR`, which must equal `Next`; after its receipt is saved, clear readiness and verify the next step against the new actual base. Start from the recorded full
-base SHA. A later step may identify its planned predecessor and expected base tree
-until that merge exists; bind its actual base SHA from the verified receipt before
-execution. Never predict a future merge SHA. `Completed` records actual merge
-results, not requested merges. `Next` must follow the remaining order and cannot
-name an already completed PR. Include each dependency in the plan and verify that its
-required tree is present before advancing. Keep detailed logs behind evidence links.
+Every planned PR needs a snapshot with exact head, expected base/tree and evidence in
+the schema's `prs` structure; missing future evidence is explicitly pending. Readiness
+applies only to the next named step. After its receipt is saved, clear readiness and
+verify the next step against the actual new base. Never predict a future merge SHA or
+repeat a completed step. Preserve actual merge commit/tree receipts and dependency
+order. Reference the original approval record and store its hash rather than copying
+the full approval body into the sequence. Link detailed logs instead of repeating them.
+Follow the [public record contract](worker-coordination.md#public-record-format): one
+readable canonical payload, no JSON fence or hidden duplicate, no runtime legacy fallback.
 
 ## Commit and squash metadata
 
@@ -155,16 +149,11 @@ Only the explicitly assigned resolver with an explicit scoped review/self-review
 may publish this exact first line for its verified integration scope. Without that grant,
 stop at `REVIEW_READY` and use the ordinary requested-review path:
 
-```markdown
-Conflict resolution: LGTM
-
-Resolver: <actual worker ID> · Role: conflict-resolver
-Sequence: <ID> · Revision: <revision>
-Reviewed head: <full SHA> · Base: <full SHA> · Verified tree: <full SHA>
-Verification: <executed checks and clearly attributed reused evidence>.
-Original authors: <source PR/worker provenance>.
-No blocking findings in the assigned integration scope.
-```
+The first line remains exactly `Conflict resolution: LGTM`. The guarded OPS renderer
+records the resolver, role, sequence/revision, original authors, head/base/tree and
+verification once using the conflict-approval schema's exact keys and v2 marker. Link
+that approval from the sequence instead of duplicating its body. Do not publish a
+handwritten partial field set as a valid structured approval.
 
 This has the same evidentiary approval level as `Self-review: LGTM` and `Review: LGTM`:
 complete scope and passing required evidence for the recorded snapshot. It identifies

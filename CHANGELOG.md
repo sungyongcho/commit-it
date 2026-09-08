@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 4.0.0 - 2026-09-07
+
+- Make concise canonical Markdown fields/nested lists the public OPS record format;
+  reject legacy JSON in normal reads and prohibit fenced or hidden duplicate payloads.
+- Require an explicitly authorized audited migration of OPS-generated records in place,
+  preserving IDs, authors and semantic evidence while excluding human content and Git history.
+- Let a requested separate reviewer repair clear implementation-scope defects directly
+  on the same PR, record reviewer-as-contributor and verify the final head before readiness.
+- Preserve paused-writer, declared-scope, personal commit/push and no-automatic-merge boundaries;
+  reviewer corrections are disclosed rather than represented as independently reviewed.
 - End ordinary worker delivery at REVIEW_READY; require an implementing-worker review
   request and a different task, with ordinary self-review only by explicit user approval.
 - Add MERGE_READY alongside REVIEW_READY after eligible review and current head/base/checks;

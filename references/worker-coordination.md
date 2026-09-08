@@ -41,9 +41,44 @@ below when taking over writers; the role does not silently grant coordinator rig
 Only separate named merge authority permits that sequence's merges. Ordinary workers
 remain PR-only, and no review heading grants merge or integration-checkout authority.
 
-The resolver separately owns the canonical `commit-it:merge-sequence:v1` comment and
+The resolver separately owns the canonical OPS v2 merge-sequence comment and
 its `Merge status`, even after its anchor PR merges. Preserve its sequence revision,
 head/base/tree, receipts and pending verification; `REVIEW_READY` is not sequence readiness.
+
+## Public record format
+
+Public OPS-generated records have a short human heading followed by canonical Markdown
+fields and nested lists. That readable content is also the machine source of truth:
+no JSON fences, hidden JSON payloads or duplicate machine/narrative metadata. Keep
+identifying markers when required, but store no second copy of record data inside them.
+Preserve the exact raw schema keys and scalar types; do not invent capitalized aliases.
+Use two-space indentation for nested bullet containers, explicit empty `[]`/`{}` and
+quoted scalars only when needed to disambiguate their type.
+Each value has one canonical field; summaries explain the outcome without repeating the
+field inventory. Preserve exact worker/Assignment/request IDs, head/base/tree, timestamps,
+authorization and evidence references. Link long logs rather than dumping them inline.
+
+Use the configured schema-aware parser/renderer. It must reject duplicate or missing
+required fields, invalid nesting/types, ambiguous markers and unsupported structures;
+never silently guess a value, drop fields or fall back to legacy JSON at runtime. Validate
+and round-trip the complete record before writing, then re-read the published content.
+API transport/configuration may still use JSON internally; this rule concerns public
+record bodies and their normal readers, not GitHub's HTTP request encoding.
+
+The existing human-readable work-state:v1 contract stays supported. Former JSON record
+types (review request, handoff, resolver action, merge sequence and conflict approval)
+use their configured v2 markers and strict Markdown schema after migration. Do not
+promise compatibility with every v1 marker or maintain a permanent dual-format reader.
+
+Legacy JSON conversion is a separate, explicitly authorized migration. Inventory the
+entire authorized managed-repository registry and identify records by verified OPS author,
+record marker/type and immutable record ID. Exclude human-authored or unmanaged content,
+quoted examples and user prose outside the managed region. Preserve original authors,
+record IDs/URLs, event timestamps and every semantic field; update the same record in place.
+Keep an audit with before/after hashes, validation, skipped/blocked targets and results.
+Re-read before writing, stop on drift, and retry only uncompleted targets idempotently.
+Do not infer migration completion from a dry run or skip unreadable records as success.
+No Git commit/message/history rewrite, deletion or automatic background migration is implied.
 
 ## Durable work-state record
 
@@ -53,13 +88,16 @@ and the issue comment mirrors it; mirror to every assigned issue in a bundle. Ma
 and Assignment before updating. Preserve surrounding content and other assignments.
 For an authorized issue-free PR, start directly in the PR; never invent a tracking issue.
 
-Keep the `v1` marker and accept legacy worker IDs. Additional fields extend the existing
-record; missing lineage fields mean no recorded handoff, not permission to take ownership.
+Keep the identifying `v1` marker and legacy worker IDs; neither requires a legacy JSON
+reader. Existing canonical Markdown fields remain valid. Missing lineage fields mean no
+recorded handoff, not permission to take ownership.
 For an approved first transfer of a legacy record, use prior handoff revision zero.
 Use actual values in this illustrative current record:
 
 ```markdown
 <!-- commit-it:work-state:v1 -->
+
+### Work state
 
 - Work status: OCCUPIED
 - Worker: codex-20260907T190000Z-a1b2c3d4
@@ -121,8 +159,10 @@ A returning old worker must re-read current ownership before any mutation and st
 former assignment after transfer unless explicitly reassigned. Succession authorizes
 preservation, implementation and the already approved delivery scope; it does not grant
 merge, deployment, credential, paid-work or force-push authority. A successor modifying
-inherited code cannot self-review without explicit user approval and must not present
-that exception as independent `Review: LGTM`.
+inherited implementation cannot self-review without explicit user approval. Requested
+review repair is a distinct bounded role: retain the original implementation worker and
+request provenance and disclose the reviewer-as-contributor rather than claiming
+independent review of its corrections.
 
 ## OPS records, labels and transitions
 
@@ -173,7 +213,11 @@ Missing or inconsistent records block a readiness claim.
    in a different conversation/task under [review eligibility](pr-review.md#request-and-eligibility).
    Record both task IDs, actual workers and head/base evidence. A worker cannot authorize
    its own self-review; only an explicit user-approved exception permits `Self-review: LGTM`.
-   Eligible separate reviews use `Review: LGTM`; an explicitly granted resolver may use
+   The separate reviewer repairs clear in-scope defects on the same PR by default. Follow
+   the [repair protocol](pr-review.md#review-and-repair) with paused original writer,
+   declared files, expected head/base and Draft/`OCCUPIED`. Record reviewer-as-contributor
+   without replacing original provenance. Eligible separate reviews use `Review: LGTM`
+   with correction disclosure; an explicitly granted resolver may use
    `Conflict resolution: LGTM` under its additional gates.
 5. **Merge ready:** add `MERGE_READY` alongside `REVIEW_READY` only with a valid eligible
    review and current passing checks for the matching head/base. Re-read all records and
@@ -186,8 +230,10 @@ Missing or inconsistent records block a readiness claim.
    those actions are explicitly granted; no global maintainer rights are implied.
 
 Re-read ownership and head immediately before mutations. Update only owned records;
-ambiguous matches, changed owners and partial writes require reconciliation. A peer
-reviewer reports findings without acquiring the branch. Draft prevents merging, not writes.
+ambiguous matches, changed owners and partial writes require reconciliation. A requested
+reviewer may hold bounded repair write ownership while the original writer pauses;
+this does not transfer unrelated implementation assignments. Draft prevents merging,
+not writes. Preserve requested scope and provenance when recording the final repair head.
 
 ## Conversation titles
 

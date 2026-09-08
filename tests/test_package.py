@@ -64,22 +64,39 @@ class PackageTests(unittest.TestCase):
         row = next(line for line in review.splitlines() if line.startswith('| `Conflict resolution: LGTM`'))
         self.assertIn('explicitly assigned `conflict-resolver`', row)
 
-    def test_sequence_record_carries_snapshot_receipts_and_separate_merge_states(self):
+    def test_sequence_excerpt_has_canonical_fields_and_separate_merge_states(self):
+        """Keep the illustrative schema lowercase and avoid publishing a duplicate payload."""
         text, blocks = self.conflict_blocks()
-        records = [body for kind, body in blocks if body.startswith('<!-- commit-it:merge-sequence:v1 -->')]
-        self.assertEqual(len(records), 1)
-        record = records[0]
-        fields = re.findall(r'^- ([^:]+): (.+)$', record, re.MULTILINE)
-        self.assertEqual(len(fields), len(dict(fields)), 'duplicate sequence record field')
-        self.assertEqual(set(dict(fields)), {'Sequence', 'Revision', 'Role', 'Resolver',
-            'Merge status', 'Base', 'Order', 'Completed', 'Next', 'Readiness scope', 'Ready PR', 'Pending verification', 'Authorization', 'Resume', 'Updated'})
-        self.assertEqual(dict(fields)['Role'], 'conflict-resolver')
-        self.assertNotIn('Work status', dict(fields))
-        self.assertIn('| PR | Head | Expected base | Verified tree | Evidence |', record)
-        self.assertIn('<!-- /commit-it:merge-sequence -->', record)
+        excerpts = [body for kind, body in blocks if body.startswith('### Merge sequence\n')]
+        self.assertEqual(len(excerpts), 1)
+        record = excerpts[0]
+        pairs = re.findall(r'^- ([^:]+):([^\n]*)$', record, re.MULTILINE)
+        fields = {name: value.strip() for name, value in pairs}
+        self.assertEqual(len(pairs), len(fields), 'duplicate canonical field')
+        self.assertEqual(set(fields), {'schema_version', 'id', 'role', 'resolver',
+                                      'revision', 'status', 'order', 'prs'})
+        self.assertEqual(fields['schema_version'], '2')
+        self.assertEqual(fields['role'], 'conflict-resolver')
+        self.assertEqual(fields['prs'], '{}')
+        self.assertEqual(len(re.findall(r'^  - ', record, re.MULTILINE)), 2)
+        self.assertNotIn('```json', record)
+        self.assertNotIn('Work status', fields)
         states = set(re.findall(r'^\| `([A-Z_]+)` \|', text, re.MULTILINE))
         self.assertEqual(states, {'PREPARING', 'MERGE_SEQUENCE_READY', 'MERGING', 'MERGED', 'BLOCKED'})
-        self.assertIn(dict(fields)['Merge status'], states)
+        self.assertIn(fields['status'], states)
+
+    def test_review_request_excerpt_has_one_public_payload(self):
+        """Preserve schema keys and a current record marker without a hidden JSON shadow."""
+        text = (ROOT / 'references/pr-review.md').read_text()
+        excerpts = re.findall(r'```markdown\n(<!-- ops:review-request:v2:[\s\S]*?)```', text)
+        self.assertEqual(len(excerpts), 1)
+        pairs = re.findall(r'^- ([^:]+): (.+)$', excerpts[0], re.MULTILINE)
+        fields = dict(pairs)
+        self.assertEqual(len(pairs), len(fields), 'duplicate request field')
+        self.assertEqual(set(fields), {'scope', 'worker', 'assignment', 'id', 'head', 'base', 'task', 'issues'})
+        self.assertEqual(fields['issues'], '[]')
+        self.assertIn(':v2:' + fields['id'] + ' -->', excerpts[0])
+        self.assertEqual(excerpts[0].count('<!--'), 1)
 
     def test_resolution_commit_example_preserves_exact_user_metadata_fields(self):
         _, blocks = self.conflict_blocks()
