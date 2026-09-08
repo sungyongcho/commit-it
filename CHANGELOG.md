@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Prefer one implementation handoff summary over per-commit progress comments, while
+  preserving historical evidence and item-specific acceptance checks.
+
 - Give user-designated moderators standing routine issue-management and direct-attachment
   authority, without per-action reapproval or image-only Git/PR workarounds.
 

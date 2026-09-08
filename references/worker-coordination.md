@@ -24,6 +24,11 @@ review request follows [review and repair](pr-review.md). Preserve current head/
 binding, repair disclosures and the project's MERGE_READY rules. No readiness label
 alone grants merging or checkout synchronization.
 
+Keep progress in the project's existing work record. At its implementation handoff,
+summarize the PR-wide completed outcomes, final checks and review notes once; refresh
+that summary after rework instead of adding per-commit delivery logs. Preserve historical
+evidence and approvals. A push alone does not complete an issue acceptance checkbox.
+
 The eligible headings remain `Self-review: LGTM`, `Review: LGTM` and
 `Conflict resolution: LGTM`. Use each only under its actual authorization. A named
 resolver follows [conflict resolution](conflict-resolution.md).
